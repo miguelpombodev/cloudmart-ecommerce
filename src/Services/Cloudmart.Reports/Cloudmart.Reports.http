@@ -1,0 +1,6 @@
+@Cloudmart.Reports_HostAddress = http://localhost:5074
+
+GET {{Cloudmart.Reports_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

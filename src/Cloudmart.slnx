@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Services/">
+    <Project Path="Services/Cloudmart.Cart/Cloudmart.Cart.csproj" />
+    <Project Path="Services/Cloudmart.Catalog/Cloudmart.Catalog.csproj" />
+    <Project Path="Services/Cloudmart.Identity/Cloudmart.Identity.csproj" />
+    <Project Path="Services/Cloudmart.Inventory/Cloudmart.Inventory.csproj" />
+    <Project Path="Services/Cloudmart.Orders/Cloudmart.Orders.csproj" />
+    <Project Path="Services/Cloudmart.Payments/Cloudmart.Payments.csproj" />
+    <Project Path="Services/Cloudmart.Reports/Cloudmart.Reports.csproj" />
+  </Folder>
+
+</Solution>
