@@ -1,0 +1,27 @@
+﻿services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+  service_bus_emulator:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+  redis:
+    image: redis:7-alpine
+  email_sender_service:
+    image: wallghost/email-sender-subscriber:latest
+  cloudmart_catalog_db:
+    image: postgres:alpine
+  prometheus:
+    image: prom/prometheus
+  grafana:
+    image: grafana/grafana
+
+networks:
+  cloudmart_net:
+    driver: bridge
+
+volumes:
+  cloudmart_catalog_db_volumes:
+  grafana_data:
+  azurite_data:
+
+
+

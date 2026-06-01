@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: azurite
+    platform: linux/amd64
+    restart: unless-stopped
+    command: >
+      azurite
+      --skipApiVersionCheck
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+    ports:
+      - "10000:10000" # Blob
+      - "10001:10001" # Queue
+      - "10002:10002" # Table
+    networks:
+      - cloudmart_net
+    volumes:
+      - azurite_data:/data
+  redis:
+    image: redis:7-alpine
+    platform: linux/amd64
+    ports:
+      - '6379:6379'
+    restart: always
+    container_name: redis_service
+    healthcheck:
+      test: [ "CMD", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    networks:
+      - cloudmart_net
+    command: redis-server --requirepass CloudMart123!
+  email_sender_service:
+    image: wallghost/email-sender-subscriber:latest
+    container_name: email_sender_service
+    platform: linux/amd64
+    environment:
+      - Smtp__Host=sandbox.smtp.mailtrap.io
+      - Smtp__Port=465
+      - Smtp__User=${SMTP_USER}
+      - Smtp__Password=${SMTP_PASSWORD}
+      - Smtp__FromEmail=no-respond@cloudmart.com
+      - Smtp__FromName="Cloudmart Shop"
+      - RabbitMq__HostName=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__UserName=admin
+      - RabbitMq__Password=admin123
+      - RabbitMq__QueueName=sub-email-sender
+      - RabbitMq__ExchangeName=sub-email-sender-exchange
+      - RabbitMq__RoutingKeyName=sub-email
+    networks:
+      - cloudmart_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  cloudmart_catalog_db:
+    image: postgres:alpine
+    container_name: cloudmart_catalog_db
+    platform: linux/amd64
+    environment:
+      - POSTGRES_USER=catalog
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=CatalogDB
+      - PGDATA=/var/lib/postgresql/data/
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - cloudmart_catalog_db_volumes:/var/lib/postgresql/data/
+  rabbitmq:
+    image: rabbitmq:4-management
+    platform: linux/amd64
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - cloudmart_net
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+
+#  cloudmart.catalog:
+#    environment:
+#      - ASPNETCORE_ENVIRONMENT=Development
+#      - ASPNETCORE_HTTP_PORTS=8080
+#      - ASPNETCORE_HTTPS_PORTS=8081
+#    ports:
+#      - "8080"
+#      - "8081"
+
+
+networks:
+  cloudmart_net:
+    driver: bridge
+
+volumes:
+  cloudmart_catalog_db_volumes:
+  grafana_data:
+  rabbitmq_data:
+  azurite_data:

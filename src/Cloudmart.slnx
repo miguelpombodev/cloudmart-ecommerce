@@ -1,12 +1,34 @@
 <Solution>
-  <Folder Name="/Services/">
-    <Project Path="Services/Cloudmart.Cart/Cloudmart.Cart.csproj" />
-    <Project Path="Services/Cloudmart.Catalog/Cloudmart.Catalog.csproj" />
-    <Project Path="Services/Cloudmart.Identity/Cloudmart.Identity.csproj" />
-    <Project Path="Services/Cloudmart.Inventory/Cloudmart.Inventory.csproj" />
-    <Project Path="Services/Cloudmart.Orders/Cloudmart.Orders.csproj" />
-    <Project Path="Services/Cloudmart.Payments/Cloudmart.Payments.csproj" />
-    <Project Path="Services/Cloudmart.Reports/Cloudmart.Reports.csproj" />
-  </Folder>
+	<Folder Name="/BuildingBlocks/">
+		<Project Path="BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj"/>
+	</Folder>
+	<Folder Name="/Services/"/>
+	<Folder Name="/Services/Cloudmard.Identity/">
+		<Project Path="Services\Identity.API\Identity.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Cart/">
+		<Project Path="Services\Cart.API\Cart.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Catalog/">
+		<Project Path="Services/Catalog.Application/Catalog.Application.csproj"/>
+		<Project Path="Services/Catalog.Domain/Catalog.Domain.csproj"/>
+		<Project Path="Services/Catalog.Infrastructure/Catalog.Infrastructure.csproj"/>
+		<Project Path="Services\Catalog.API\Catalog.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Inventory/">
+		<Project Path="Services\Inventory.API\Inventory.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Orders/">
+		<Project Path="Services\Orders.API\Orders.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Payments/">
+		<Project Path="Services\Payments.API\Payments.API.csproj"/>
+	</Folder>
+	<Folder Name="/Services/Cloudmart.Reports/">
+		<Project Path="Services\Reports.API\Reports.API.csproj"/>
+	</Folder>
+	<Folder Name="/Solution Items/">
+		<File Path="docker-compose.yaml"/>
+	</Folder>
 
 </Solution>
