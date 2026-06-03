@@ -6,32 +6,138 @@
 	],
 	"exchanges": [
 		{
-			"name": "sub-email-sender-exchange",
+			"name": "cloudmart-events",
 			"vhost": "/",
 			"type": "direct",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "cloudmart-dlx",
+			"vhost": "/",
+			"type": "direct",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "domain-events",
+			"vhost": "/",
+			"type": "topic",
 			"durable": true,
 			"auto_delete": false
 		}
 	],
 	"queues": [
 		{
-			"name": "sub-email-sender",
+			"name": "order.placed",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "payment.processed",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "stock.reserved",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "inventory.sub",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "notification.sub",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		},
+		{
+			"name": "notification.email",
 			"vhost": "/",
 			"durable": true,
 			"auto_delete": false,
 			"arguments": {
-				"x-dead-letter-exchange": "dlx-exchange",
+				"x-dead-letter-exchange": "cloudmart-dlx",
 				"x-message-ttl": 86400000
 			}
+		},
+		{
+			"name": "notification-email-dlq",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
 		}
 	],
 	"bindings": [
 		{
-			"source": "sub-email-sender-exchange",
+			"source": "cloudmart-events",
 			"vhost": "/",
-			"destination": "sub-email-sender",
+			"destination": "order.placed",
 			"destination_type": "queue",
-			"routing_key": "sub-email"
+			"routing_key": "order.placed"
+		},
+		{
+			"source": "cloudmart-events",
+			"vhost": "/",
+			"destination": "payment.processed",
+			"destination_type": "queue",
+			"routing_key": "payment.processed"
+		},
+		{
+			"source": "cloudmart-events",
+			"vhost": "/",
+			"destination": "stock.reserved",
+			"destination_type": "queue",
+			"routing_key": "stock.reserved"
+		},
+		{
+			"source": "cloudmart-events",
+			"vhost": "/",
+			"destination": "notification.email",
+			"destination_type": "queue",
+			"routing_key": "notification.email"
+		},
+		{
+			"source": "cloudmart-dlx",
+			"vhost": "/",
+			"destination": "notification-email-dlq",
+			"destination_type": "queue",
+			"routing_key": "notification.email"
+		},
+		{
+			"source": "domain-events",
+			"vhost": "/",
+			"destination": "inventory.sub",
+			"destination_type": "queue",
+			"routing_key": "order.placed"
+		},
+		{
+			"source": "domain-events",
+			"vhost": "/",
+			"destination": "notification.sub",
+			"destination_type": "queue",
+			"routing_key": "order.placed"
+		},
+		{
+			"source": "domain-events",
+			"vhost": "/",
+			"destination": "notification.sub",
+			"destination_type": "queue",
+			"routing_key": "payment.confirmed"
+		},
+		{
+			"source": "domain-events",
+			"vhost": "/",
+			"destination": "notification.sub",
+			"destination_type": "queue",
+			"routing_key": "order.shipped"
 		}
 	]
 }
