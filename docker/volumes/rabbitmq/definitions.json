@@ -1,0 +1,37 @@
+{
+	"vhosts": [
+		{
+			"name": "/"
+		}
+	],
+	"exchanges": [
+		{
+			"name": "sub-email-sender-exchange",
+			"vhost": "/",
+			"type": "direct",
+			"durable": true,
+			"auto_delete": false
+		}
+	],
+	"queues": [
+		{
+			"name": "sub-email-sender",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false,
+			"arguments": {
+				"x-dead-letter-exchange": "dlx-exchange",
+				"x-message-ttl": 86400000
+			}
+		}
+	],
+	"bindings": [
+		{
+			"source": "sub-email-sender-exchange",
+			"vhost": "/",
+			"destination": "sub-email-sender",
+			"destination_type": "queue",
+			"routing_key": "sub-email"
+		}
+	]
+}

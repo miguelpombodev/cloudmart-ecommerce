@@ -1,0 +1,58 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis_service
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - cloudmart_net
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ../volumes/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ../volumes/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    networks:
+      - cloudmart_net
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: azurite
+    command: >
+      azurite
+      --skipApiVersionCheck
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+    volumes:
+      - azurite_data:/data
+    networks:
+      - cloudmart_net
+
+  catalog-db:
+    image: postgres:16-alpine
+    container_name: cloudmart_catalog_db
+    environment:
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: CatalogDB
+    volumes:
+      - catalog_db_data:/var/lib/postgresql/data
+      - ../volumes/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - cloudmart_net
+
+networks:
+  cloudmart_net:
+    name: cloudmart_net
+
+volumes:
+  rabbitmq_data:
+  azurite_data:
+  catalog_db_data:

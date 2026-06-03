@@ -1,0 +1,142 @@
+{
+	"title": "Cloudmart - Overview",
+	"uid": "cloudmart-overview",
+	"tags": [
+		"cloudmart",
+		"overview"
+	],
+	"timezone": "browser",
+	"schemaVersion": 38,
+	"refresh": "30s",
+	"time": {
+		"from": "now-1h",
+		"to": "now"
+	},
+	"panels": [
+		{
+			"id": 1,
+			"title": "Request Rate (req/s)",
+			"type": "timeseries",
+			"gridPos": {
+				"x": 0,
+				"y": 0,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "prometheus"
+			},
+			"targets": [
+				{
+					"expr": "sum(rate(http_server_request_duration_seconds_count[1m])) by (service_name)",
+					"legendFormat": "{{service_name}}"
+				}
+			]
+		},
+		{
+			"id": 2,
+			"title": "Error Rate (%)",
+			"type": "timeseries",
+			"gridPos": {
+				"x": 12,
+				"y": 0,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "prometheus"
+			},
+			"targets": [
+				{
+					"expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])) by (service_name) / sum(rate(http_server_request_duration_seconds_count[1m])) by (service_name) * 100",
+					"legendFormat": "{{service_name}}"
+				}
+			]
+		},
+		{
+			"id": 3,
+			"title": "P95 Latency (ms)",
+			"type": "timeseries",
+			"gridPos": {
+				"x": 0,
+				"y": 8,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "prometheus"
+			},
+			"targets": [
+				{
+					"expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[1m])) by (le, service_name)) * 1000",
+					"legendFormat": "{{service_name}}"
+				}
+			]
+		},
+		{
+			"id": 4,
+			"title": "Logs (últimos erros)",
+			"type": "logs",
+			"gridPos": {
+				"x": 12,
+				"y": 8,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "loki"
+			},
+			"targets": [
+				{
+					"expr": "{level=\"error\"} | json",
+					"legendFormat": ""
+				}
+			],
+			"options": {
+				"showTime": true,
+				"showLabels": true,
+				"wrapLogMessage": true
+			}
+		},
+		{
+			"id": 5,
+			"title": "CPU Usage por serviço",
+			"type": "timeseries",
+			"gridPos": {
+				"x": 0,
+				"y": 16,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "prometheus"
+			},
+			"targets": [
+				{
+					"expr": "sum(rate(process_cpu_seconds_total[1m])) by (service_name) * 100",
+					"legendFormat": "{{service_name}}"
+				}
+			]
+		},
+		{
+			"id": 6,
+			"title": "Memória em uso (MB)",
+			"type": "timeseries",
+			"gridPos": {
+				"x": 12,
+				"y": 16,
+				"w": 12,
+				"h": 8
+			},
+			"datasource": {
+				"uid": "prometheus"
+			},
+			"targets": [
+				{
+					"expr": "sum(process_working_set_bytes) by (service_name) / 1024 / 1024",
+					"legendFormat": "{{service_name}}"
+				}
+			]
+		}
+	]
+}

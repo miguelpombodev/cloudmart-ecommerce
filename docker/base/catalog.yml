@@ -1,0 +1,21 @@
+services:
+  catalog-api:
+    image: cloudmart/catalog-api:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__CatalogDb: "Host=catalog-db;Database=CatalogDB;Username=catalog;Password=postgres"
+      Redis__ConnectionString: "redis:6379,password=${REDIS_PASSWORD}"
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      - catalog-db
+      - redis
+      - rabbitmq
+    networks:
+      - cloudmart_net
+
+networks:
+  cloudmart_net:
+    external: true

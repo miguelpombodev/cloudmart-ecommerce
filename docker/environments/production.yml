@@ -1,0 +1,16 @@
+# docker/environments/production.yml
+include:
+  - path: ../base/infrastructure.yml
+    env_file: ../.env.production
+
+  - path: ../base/catalog.yml
+    env_file: ../.env.production
+
+  - path: ../base/identity.yml
+    env_file: ../.env.production
+
+  - path: ../observability/docker-compose.observability.yml
+    env_file: ../.env.production
+
+  - path: ../overrides/catalog.production.yml
+    env_file: ../.env.production

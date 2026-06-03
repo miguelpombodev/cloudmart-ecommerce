@@ -1,0 +1,22 @@
+services:
+
+  redis:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+
+  rabbitmq:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  catalog-db:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M

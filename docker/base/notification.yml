@@ -1,0 +1,31 @@
+services:
+
+  email-sender:
+    image: wallghost/email-sender-subscriber:latest
+    container_name: email_sender_service
+    restart: unless-stopped
+    environment:
+      Smtp__Host: ${SMTP_HOST}
+      Smtp__Port: ${SMTP_PORT}
+      Smtp__User: ${SMTP_USER}
+      Smtp__Password: ${SMTP_PASSWORD}
+      Smtp__FromEmail: ${SMTP_FROM_EMAIL}
+      Smtp__FromName: ${SMTP_FROM_NAME}
+
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__QueueName: ${EMAIL_QUEUE_NAME}
+      RabbitMq__ExchangeName: ${EMAIL_EXCHANGE_NAME}
+      RabbitMq__RoutingKeyName: ${EMAIL_ROUTING_KEY}
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - cloudmart_net
+
+networks:
+  cloudmart_net:
+    external: true

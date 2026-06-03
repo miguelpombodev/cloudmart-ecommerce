@@ -1,0 +1,18 @@
+include:
+  - path: ../base/infrastructure.yml
+    env_file: ../.env.development
+
+  - path: ../base/catalog.yml
+    env_file: ../.env.development
+
+  - path: ../base/identity.yml
+    env_file: ../.env.development
+
+  - path: ../base/notification.yml
+    env_file: ../.env.development
+
+  - path: ../observability/docker-compose.observability.yml
+    env_file: ../.env.development
+
+  - path: ../overrides/infrastructure.development.yml
+  - path: ../overrides/catalog.development.yml

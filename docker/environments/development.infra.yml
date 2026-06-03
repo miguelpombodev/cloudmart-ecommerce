@@ -1,0 +1,8 @@
+include:
+  - path: ../base/infrastructure.yml
+    env_file: ../.env.development
+
+  - path: ../observability/docker-compose.observability.yml
+    env_file: ../.env.development
+
+  - path: ../overrides/infrastructure.development.yml

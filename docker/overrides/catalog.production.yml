@@ -1,0 +1,20 @@
+services:
+  catalog-api:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+    # This option only works with Docker Swarm
+    #    deploy:
+    #      replicas: 2
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3

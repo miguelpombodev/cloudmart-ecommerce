@@ -1,0 +1,11 @@
+services:
+  identity-api:
+    image: cloudmart/identity-api:${TAG:-latest}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+    networks:
+      - cloudmart_net
+
+networks:
+  cloudmart_net:
+    external: true
