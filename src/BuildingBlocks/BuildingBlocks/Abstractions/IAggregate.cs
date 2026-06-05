@@ -1,8 +1,7 @@
-namespace Catalog.Domain.Abstractions;
+namespace BuildingBlocks.Abstractions;
 
 public interface IAggregate<T> : IAggregate, IEntity<T>
 {
-
 }
 
 public interface IAggregate : IEntity

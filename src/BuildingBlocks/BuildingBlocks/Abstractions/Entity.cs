@@ -1,6 +1,6 @@
-namespace Catalog.Domain.Abstractions;
+namespace BuildingBlocks.Abstractions;
 
-public abstract class Entity<T>: IEntity<T>
+public abstract class Entity<T> : IEntity<T>
 {
 	public required T Id { get; set; }
 	public DateTime? CreatedAt { get; set; }
