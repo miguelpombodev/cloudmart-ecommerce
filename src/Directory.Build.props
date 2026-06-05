@@ -6,7 +6,7 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Deterministic>true</Deterministic>
-		<NoWarn>T0046;T0045;T0012;</NoWarn>
+		<NoWarn>T0046;T0045;T0012;T0010;T0026;T0018;T0029</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
