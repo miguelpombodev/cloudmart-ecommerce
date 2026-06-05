@@ -41,7 +41,6 @@ services:
     environment:
       POSTGRES_USER: catalog
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: CatalogDB
     volumes:
       - catalog_db_data:/var/lib/postgresql/data
       - ../volumes/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
