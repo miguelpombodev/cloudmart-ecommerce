@@ -27,6 +27,8 @@
 	<Folder Name="/Services/Cloudmart.Reports/">
 		<Project Path="Services\Reports.API\Reports.API.csproj" />
 	</Folder>
-	<Folder Name="/Solution Items/" />
+	<Folder Name="/Solution Items/">
+		<File Path="..\.editorconfig" />
+	</Folder>
 
 </Solution>
