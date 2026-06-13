@@ -12,71 +12,71 @@ namespace Catalog.Infrastructure;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddInfrastructureServices(
-		this IServiceCollection services,
-		IConfiguration configuration)
-	{
-		string checkConnectionString =
-			configuration.GetConnectionString("Database") ??
-			throw new InvalidOperationException("No Connection String informed");
+  public static IServiceCollection AddInfrastructureServices(
+    this IServiceCollection services,
+    IConfiguration configuration)
+  {
+    string checkConnectionString =
+      configuration.GetConnectionString("Database") ??
+      throw new InvalidOperationException("No Connection String informed");
 
-		string? connectionString = configuration.GetConnectionString(checkConnectionString);
+    configuration.GetConnectionString(checkConnectionString);
 
-		return services;
-	}
+    return services;
+  }
 
-	public static ILoggingBuilder AddLoggingBuilder(
-		this ILoggingBuilder logging,
-		IConfiguration configuration)
-	{
-		string serviceName =
-			configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
+  public static ILoggingBuilder AddLoggingBuilder(
+    this ILoggingBuilder logging,
+    IConfiguration configuration)
+  {
+    string serviceName =
+      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
 
-		Log.Logger = new LoggerConfiguration()
-			.Enrich
-			.WithProperty("service", serviceName)
-			.Enrich
-			.WithEnvironmentName()
-			.Enrich
-			.WithMachineName()
-			.Enrich
-			.WithThreadId()
-			.Enrich
-			.WithOpenTelemetryTraceId()
-			.Enrich
-			.WithOpenTelemetrySpanId()
-			.WriteTo
-			.Console(outputTemplate:
-				"[{Timestamp:HH:mm:ss} {Level:u3}] [{MachineName}] {Message:lj}{NewLine}{Exception}")
-			.CreateLogger();
+    Log.Logger = new LoggerConfiguration()
+      .Enrich
+      .WithProperty("service", serviceName)
+      .Enrich
+      .WithEnvironmentName()
+      .Enrich
+      .WithMachineName()
+      .Enrich
+      .WithThreadId()
+      .Enrich
+      .WithOpenTelemetryTraceId()
+      .Enrich
+      .WithOpenTelemetrySpanId()
+      .WriteTo
+      .Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{MachineName}] {Message:lj}{NewLine}{Exception}")
+      .CreateLogger();
 
-		logging.AddOpenTelemetry(options =>
-		{
-			options.SetResourceBuilder(
-					ResourceBuilder.CreateDefault()
-						.AddService(serviceName))
-				.AddConsoleExporter();
-		});
+    logging.AddOpenTelemetry(options =>
+    {
+      options.SetResourceBuilder(
+          ResourceBuilder.CreateDefault()
+            .AddService(serviceName))
+        .AddConsoleExporter();
+    });
 
-		return logging;
-	}
+    return logging;
+  }
 
-	public static IServiceCollection AddTelemetryServices(
-		this IServiceCollection services,
-		IConfiguration configuration)
-	{
-		string serviceName =
-			configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
+  public static IServiceCollection AddTelemetryServices(
+    this IServiceCollection services,
+    IConfiguration configuration)
+  {
+    string serviceName =
+      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
 
-		services.AddOpenTelemetry()
-			.ConfigureResource(resource => resource.AddService(serviceName))
-			.WithTracing(tracing => tracing
-				.AddAspNetCoreInstrumentation()
-				.AddConsoleExporter())
-			.WithMetrics(metrics => metrics
-				.AddAspNetCoreInstrumentation()
-				.AddConsoleExporter());
+    services.AddOpenTelemetry()
+      .ConfigureResource(resource => resource.AddService(serviceName))
+      .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddConsoleExporter())
+      .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddConsoleExporter());
 
-		return services;
-	}
+    return services;
+  }
 }

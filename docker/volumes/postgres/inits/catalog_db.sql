@@ -1,9 +1,9 @@
 CREATE ROLE catalog WITH ADMIN
-	LOGIN
-	PASSWORD 'postgres'
-	NOSUPERUSER
-	NOCREATEDB
-	NOCREATEROLE;
+    LOGIN
+    PASSWORD 'postgres'
+    NOSUPERUSER
+    NOCREATEDB
+    NOCREATEROLE;
 
 CREATE
 DATABASE "CatalogDB"
@@ -168,4 +168,57 @@ SYSTEM SET track_io_timing      = 'on';   -- mede tempo real de I/O nas queries
 ALTER
 SYSTEM SET track_wal_io_timing  = 'on';
 
-SELECT pg_reload_conf(); -- aplica sem restart
+SELECT pg_reload_conf();
+-- aplica sem restart
+
+-- OutboxMessages Table
+CREATE TABLE IF NOT EXISTS catalog.outbox_messages
+(
+    id
+    uuid
+    NOT
+    NULL,
+    type
+    text
+    NOT
+    NULL,
+    payload
+    jsonb
+    NOT
+    NULL, -- jsonb permite indexar campos internos
+    occured_on
+    timestamp
+    with
+    time
+    zone
+    NOT
+    NULL,
+    processed_one
+    timestamp
+    with
+    time
+    zone
+    NULL,
+    error
+    text
+    NULL,
+
+    CONSTRAINT
+    pk_outbox_messages
+    PRIMARY
+    KEY
+(
+    id
+)
+    )
+
+CREATE INDEX idx_outbox_messages on catalog.outbox_messages (ocurred_on ASC) WHERE processed_on IS NULL; -- índice parcial - só indexa pendentes
+
+COMMENT
+ON TABLE  catalog.outbox_messages               IS 'Outbox pattern — eventos pendentes de publicação';
+COMMENT
+ON COLUMN catalog.outbox_messages.type          IS 'AssemblyQualifiedName do tipo do evento para desserialização';
+COMMENT
+ON COLUMN catalog.outbox_messages.processed_on  IS 'NULL indica mensagem pendente. Preenchido após publicação no broker';
+COMMENT
+ON COLUMN catalog.outbox_messages.error         IS 'Preenchido quando a publicação falha após todas as tentativas';
