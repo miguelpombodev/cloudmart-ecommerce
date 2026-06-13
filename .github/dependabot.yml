@@ -1,0 +1,50 @@
+# .github/dependabot.yml
+version: 2
+
+updates:
+
+  # ─── NuGet — suas dependências .NET ──────────────────────────────────────────
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "Europe/Lisbon"
+    open-pull-requests-limit: 10
+    groups:
+      # Agrupa todas as atualizações de patch em um único PR
+      # Evita 20 PRs separados para atualizações minor
+      patch-updates:
+        update-types: ["patch"]
+      aspnetcore:
+        patterns: ["Microsoft.AspNetCore.*"]
+      opentelemetry:
+        patterns: ["OpenTelemetry.*"]
+    labels:
+      - "dependencies"
+      - "nuget"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # ─── GitHub Actions ───────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci"
+
+  # ─── Docker ───────────────────────────────────────────────────────────────────
+  - package-ecosystem: docker
+    directory: "/docker"
+    schedule:
+      interval: weekly
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(deps)"
