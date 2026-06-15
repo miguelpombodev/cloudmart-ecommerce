@@ -1,3 +1,5 @@
+using BuildingBlocks.Exceptions;
+
 namespace Catalog.Domain.ValueObject;
 
 public class Review : BuildingBlocks.Abstractions.ValueObject

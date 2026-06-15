@@ -1,3 +1,5 @@
+using BuildingBlocks.Exceptions;
+
 namespace Catalog.Domain.ValueObject;
 
 public sealed class Image : BuildingBlocks.Abstractions.ValueObject
