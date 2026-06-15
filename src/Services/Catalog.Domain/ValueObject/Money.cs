@@ -1,3 +1,5 @@
+using BuildingBlocks.Exceptions;
+
 namespace Catalog.Domain.ValueObject;
 
 public sealed class Money : BuildingBlocks.Abstractions.ValueObject
