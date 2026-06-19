@@ -21,7 +21,7 @@ public sealed class Password : BuildingBlocks.Abstractions.ValueObject
   {
     string regexPattern = @"^(?!.*\s)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
 
-    if (string.IsNullOrWhiteSpace(plainPassword) || plainPassword.Length <= 7)
+    if (string.IsNullOrWhiteSpace(plainPassword) || plainPassword.Length < 8)
     {
       throw new DomainException("Password must have at least 8 characters");
     }
