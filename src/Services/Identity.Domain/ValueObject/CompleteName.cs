@@ -25,7 +25,7 @@ public class CompleteName : BuildingBlocks.Abstractions.ValueObject
 
   public static CompleteName Create(string firstName, string lastName)
   {
-    var nameStartedWithNumberRegexPattern = @"^\d";
+    string nameStartedWithNumberRegexPattern = @"^\d";
 
     if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
     {
