@@ -17,3 +17,7 @@ services:
   catalog-db:
     ports:
       - "5432:5432"
+
+  identity-db:
+    ports:
+      - "5433:5433"

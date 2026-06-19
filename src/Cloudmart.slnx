@@ -5,8 +5,8 @@
 	<Folder Name="/Services/" />
 	<Folder Name="/Services/Cloudmard.Identity/">
 		<Project Path="Services/Identity.Domain/Identity.Domain.csproj" />
+		<Project Path="Services/Identity.Infrastructure/Identity.Infrastructure.csproj" />
 		<Project Path="Services\Identity.API\Identity.API.csproj" />
-		<Project Path="Services\Identity.Infrastructure\Identity.Infrastructure.csproj" />
 	</Folder>
 	<Folder Name="/Services/Cloudmart.Cart/">
 		<Project Path="Services\Cart.API\Cart.API.csproj" />

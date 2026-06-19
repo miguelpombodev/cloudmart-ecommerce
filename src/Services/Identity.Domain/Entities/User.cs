@@ -6,18 +6,6 @@ namespace Identity.Domain.Entities;
 
 public class User : Aggregate<Guid>
 {
-  public CompleteName Name { get; }
-
-  public Email Email { get; }
-
-  public Password Password { get; }
-
-  public Role Role { get; }
-
-  public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
-
-  public bool IsActive { get; private set; }
-
   private readonly List<RefreshToken> _refreshTokens = [];
 
   private User()
@@ -39,6 +27,18 @@ public class User : Aggregate<Guid>
     UpdatedAt = DateTime.UtcNow;
   }
 
+  public CompleteName Name { get; }
+
+  public Email Email { get; }
+
+  public Password Password { get; }
+
+  public Role Role { get; }
+
+  public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+
+  public bool IsActive { get; private set; }
+
   public static Result<User> Create(
     CompleteName name,
     Email email,
@@ -50,14 +50,14 @@ public class User : Aggregate<Guid>
     return user;
   }
 
-  public User Revoke(User user)
+  public void Revoke()
   {
-    foreach (RefreshToken tokens in user.RefreshTokens)
+    foreach (RefreshToken tokens in _refreshTokens)
     {
       tokens.RevokeToken();
     }
 
-    return user;
+    IsActive = false;
   }
 
   public void AddRefreshToken(RefreshToken token) =>
