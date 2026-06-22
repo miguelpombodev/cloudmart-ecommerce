@@ -39,11 +39,11 @@ services:
     image: postgres:16-alpine
     container_name: cloudmart_catalog_db
     environment:
-      POSTGRES_USER: catalog
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - catalog_db_data:/var/lib/postgresql/data
-      - ../volumes/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../volumes/postgres/inits/catalog_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - cloudmart_net
 
@@ -51,11 +51,11 @@ services:
     image: postgres:16-alpine
     container_name: cloudmart_identity_db
     environment:
-      POSTGRES_USER: identity
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - identity_db_data:/var/lib/postgresql/data
-      - ../volumes/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../volumes/postgres/inits/identity_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - cloudmart_net
 

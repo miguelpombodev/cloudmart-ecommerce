@@ -27,13 +27,13 @@ public class User : Aggregate<Guid>
     UpdatedAt = DateTime.UtcNow;
   }
 
-  public CompleteName Name { get; }
+  public CompleteName Name { get; private set; }
 
-  public Email Email { get; }
+  public Email Email { get; private set; }
 
-  public Password Password { get; }
+  public Password Password { get; private set; }
 
-  public Role Role { get; }
+  public Role Role { get; private set; }
 
   public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 

@@ -1,11 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore"/>
@@ -25,7 +18,7 @@
     <PackageReference Include="Serilog.Extensions.Logging"/>
     <PackageReference Include="Serilog.Sinks.Console"/>
     <PackageReference Include="Serilog.Sinks.Grafana.Loki"/>
-    <PackageReference Include="SixLabors.ImageSharp"/>
+    <PackageReference Include="Magick.NET.Core"/>
   </ItemGroup>
 
   <ItemGroup>

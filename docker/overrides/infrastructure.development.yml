@@ -20,4 +20,4 @@ services:
 
   identity-db:
     ports:
-      - "5433:5433"
+      - "5433:5432"

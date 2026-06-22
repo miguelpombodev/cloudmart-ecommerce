@@ -1,4 +1,4 @@
-CREATE ROLE catalog WITH ADMIN
+CREATE ROLE catalog WITH
     LOGIN
     PASSWORD 'postgres'
     NOSUPERUSER
@@ -8,7 +8,7 @@ CREATE ROLE catalog WITH ADMIN
 CREATE
 DATABASE "CatalogDB"
        WITH
-       OWNER = 'catalog'
+       OWNER = catalog
        ENCODING = 'UTF8'
        LC_COLLATE = 'C.UTF-8'
        LC_CTYPE = 'C.UTF-8'
@@ -18,15 +18,15 @@ DATABASE "CatalogDB"
 COMMENT
 ON DATABASE "CatalogDB" IS 'Cloudmart - Catalog Service';
 
-connect
+\connect
 "CatalogDB"
 
 CREATE
-EXTENSION IF NOT EXISTS "uuid-ossp" -- UUIDs
+EXTENSION IF NOT EXISTS "uuid-ossp"; -- UUIDs
 CREATE
-EXTENSION IF NOT EXISTS "pg_trgm" -- search for similarity
+EXTENSION IF NOT EXISTS "pg_trgm"; -- search for similarity
 CREATE
-EXTENSION IF NOT EXISTS "unaccent" -- search without accent
+EXTENSION IF NOT EXISTS "unaccent"; -- search without accent
 
 CREATE
 EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -46,20 +46,22 @@ NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'catalog_readonly') THEN
 CREATE ROLE catalog_readonly NOLOGIN;
 END IF;
 END
-$$
+$$;
 
 
 -- App role
-DO $$
+DO
+$$
 BEGIN
 	IF
 NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'catalog_app') THEN
 CREATE ROLE catalog_app NOLOGIN;
 END IF;
 END
-$$
+$$;
 
-GRANT USAGE ON SCHEMA catalog TO catalog_app;
+GRANT USAGE ON SCHEMA
+catalog TO catalog_app;
 GRANT USAGE ON SCHEMA
 catalog TO catalog_readonly;
 
@@ -84,8 +86,14 @@ ON ALL TABLES IN SCHEMA catalog TO catalog_readonly;
 
 -- Garantee that future tables, like migrations table, herit permissions from others
 ALTER
-DEFAULT PRIVILEGES IN SCHEMA catalog;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO catalog_app;
+DEFAULT PRIVILEGES IN SCHEMA catalog
+GRANT
+SELECT,
+INSERT
+,
+UPDATE,
+DELETE
+ON TABLES TO catalog_app;
 
 ALTER
 DEFAULT PRIVILEGES IN SCHEMA catalog
@@ -109,7 +117,7 @@ DATABASE "CatalogDB" SET enable_seqscan TO on;
 
 -- More accurate statistics for query planner
 ALTER
-DATABASE "CatalogDB" SET default_statistics TO 100;
+DATABASE "CatalogDB" SET default_statistics_target TO 100;
 
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
@@ -185,15 +193,15 @@ CREATE TABLE IF NOT EXISTS catalog.outbox_messages
     payload
     jsonb
     NOT
-    NULL, -- jsonb permite indexar campos internos
-    occured_on
+    NULL,
+    occurred_on
     timestamp
     with
     time
     zone
     NOT
     NULL,
-    processed_one
+    processed_on
     timestamp
     with
     time
@@ -210,9 +218,10 @@ CREATE TABLE IF NOT EXISTS catalog.outbox_messages
 (
     id
 )
-    )
+    );
 
-CREATE INDEX idx_outbox_messages on catalog.outbox_messages (ocurred_on ASC) WHERE processed_on IS NULL; -- índice parcial - só indexa pendentes
+CREATE INDEX idx_outbox_messages_pending
+    ON catalog.outbox_messages (occurred_on ASC) WHERE processed_on IS NULL; -- índice parcial - só indexa pendentes
 
 COMMENT
 ON TABLE  catalog.outbox_messages               IS 'Outbox pattern — eventos pendentes de publicação';
