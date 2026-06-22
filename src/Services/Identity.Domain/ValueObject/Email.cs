@@ -5,8 +5,6 @@ namespace Identity.Domain.ValueObject;
 
 public sealed class Email : BuildingBlocks.Abstractions.ValueObject
 {
-  public string Address { get; }
-
   private Email()
   {
     Address = null!;
@@ -16,6 +14,8 @@ public sealed class Email : BuildingBlocks.Abstractions.ValueObject
   {
     Address = address;
   }
+
+  public string Address { get; }
 
   public static Email Create(string emailAddress)
   {

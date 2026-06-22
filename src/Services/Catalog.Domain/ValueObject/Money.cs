@@ -16,6 +16,7 @@ public sealed class Money : BuildingBlocks.Abstractions.ValueObject
   }
 
   public decimal Amount { get; }
+
   public string Currency { get; }
 
   public static Money Create(decimal amount, string currency)
@@ -33,7 +34,8 @@ public sealed class Money : BuildingBlocks.Abstractions.ValueObject
     return new Money(amount, currency.ToUpperInvariant());
   }
 
-  public static Money Zero(string currency) => new(0, currency);
+  public static Money Zero(string currency) =>
+    new(0, currency);
 
   public Money Add(Money other)
   {
@@ -45,7 +47,8 @@ public sealed class Money : BuildingBlocks.Abstractions.ValueObject
     return new Money(Amount + other.Amount, Currency);
   }
 
-  public override string ToString() => $"{Amount:F2} {Currency}";
+  public override string ToString() =>
+    $"{Amount:F2} {Currency}";
 
   protected override IEnumerable<object?> RetrieveEqualityComponents()
   {

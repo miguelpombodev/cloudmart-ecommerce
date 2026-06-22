@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+
 using BuildingBlocks.Exceptions;
 
 namespace Identity.Domain.ValueObject;

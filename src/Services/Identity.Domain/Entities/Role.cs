@@ -6,10 +6,6 @@ namespace Identity.Domain.Entities;
 
 public class Role : Entity<Guid>
 {
-  public RoleType Name { get; }
-
-  public string Description { get; }
-
   private Role()
   {
     Description = null!;
@@ -20,6 +16,10 @@ public class Role : Entity<Guid>
     Description = description;
     Name = name;
   }
+
+  public RoleType Name { get; private set; }
+
+  public string Description { get; private set; }
 
   public static Role Create(string description, RoleType name = RoleType.Customer)
   {

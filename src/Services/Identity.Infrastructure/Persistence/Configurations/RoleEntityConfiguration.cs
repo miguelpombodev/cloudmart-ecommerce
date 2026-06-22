@@ -13,7 +13,6 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
 
     builder.Property(r => r.Name)
       .HasColumnName("role_name")
-      .HasDefaultValue(RoleType.Customer)
       .HasConversion(
         type => type.ToString(),
         dbStatus => (RoleType)Enum.Parse(typeof(RoleType), dbStatus));

@@ -1,21 +1,24 @@
+using Identity.Infrastructure;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+IConfiguration configuration = builder.Configuration;
+
+builder.Logging.AddLoggingBuilder(configuration);
+
 builder.Services.AddOpenApi();
+
+builder.Services
+  .AddInfrastructureServices(configuration)
+  .AddTelemetryServices(configuration);
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
   app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
-
-app.MapGet("/", () => { return new { message = "Hello World!" }; })
-  .WithName("GetWeatherForecast");
 
 await app.RunAsync();

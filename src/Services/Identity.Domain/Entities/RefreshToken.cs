@@ -1,23 +1,7 @@
-using BuildingBlocks.Domain;
-
 namespace Identity.Domain.Entities;
 
 public class RefreshToken
 {
-  public Guid Id { get; private set; }
-
-  public Guid UserId { get; private set; }
-
-  public DateTimeOffset ExpiresAt { get; private set; }
-
-  public DateTimeOffset CreatedAt { get; private set; }
-
-  public bool IsRevoked { get; private set; }
-
-  public DateTimeOffset? RevokedAt { get; private set; }
-
-  public string Token { get; private set; } = null!;
-
   private RefreshToken()
   {
   }
@@ -38,16 +22,26 @@ public class RefreshToken
     RevokedAt = revokedAt;
   }
 
-  public static RefreshToken Create(
-    Guid userId,
-    DateTime expiresAt)
-  {
-    return new RefreshToken(Guid.NewGuid(), userId, expiresAt, DateTimeOffset.UtcNow, false, null);
-  }
+  public Guid Id { get; private set; }
+
+  public Guid UserId { get; private set; }
+
+  public DateTimeOffset ExpiresAt { get; }
+
+  public DateTimeOffset CreatedAt { get; private set; }
+
+  public bool IsRevoked { get; private set; }
+
+  public DateTimeOffset? RevokedAt { get; private set; }
+
+  public string Token { get; private set; } = null!;
 
   public bool IsExpired => DateTimeOffset.UtcNow > ExpiresAt;
 
   public bool IsActive => !IsRevoked && !IsExpired;
+
+  public static RefreshToken Create(Guid userId, DateTime expiresAt) =>
+    new(Guid.NewGuid(), userId, expiresAt, DateTimeOffset.UtcNow, false, null);
 
   public void RevokeToken()
   {

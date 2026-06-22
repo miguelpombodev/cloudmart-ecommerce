@@ -5,8 +5,6 @@ namespace Identity.Domain.ValueObject;
 
 public sealed class Password : BuildingBlocks.Abstractions.ValueObject
 {
-  public string HashedValue { get; }
-
   private Password()
   {
     HashedValue = null!;
@@ -16,6 +14,8 @@ public sealed class Password : BuildingBlocks.Abstractions.ValueObject
   {
     HashedValue = hashedPassword;
   }
+
+  public string HashedValue { get; }
 
   public static Password Create(string plainPassword)
   {
@@ -44,5 +44,5 @@ public sealed class Password : BuildingBlocks.Abstractions.ValueObject
   }
 
   private static string Hash(string plainPassword) =>
-    BCrypt.Net.BCrypt.HashPassword(plainPassword, workFactor: 12);
+    BCrypt.Net.BCrypt.HashPassword(plainPassword, 12);
 }
