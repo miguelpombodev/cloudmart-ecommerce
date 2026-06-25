@@ -26,17 +26,19 @@ public sealed class Email : BuildingBlocks.Abstractions.ValueObject
       throw new DomainException("Email Address cannot be null or whitespaced");
     }
 
+    string trimmedEmail = emailAddress.ToLower().Trim();
+
     if (emailAddress.Length <= 5)
     {
       throw new DomainException("Email Address must have more than 5 characters");
     }
 
-    if (!Regex.IsMatch(emailAddress, emailRegexPattern))
+    if (!Regex.IsMatch(emailAddress.Trim(), emailRegexPattern))
     {
       throw new DomainException("Email Address needs to be a valid email");
     }
 
-    return new Email(emailAddress.ToLower().Trim());
+    return new Email(trimmedEmail);
   }
 
   protected override IEnumerable<object?> RetrieveEqualityComponents()

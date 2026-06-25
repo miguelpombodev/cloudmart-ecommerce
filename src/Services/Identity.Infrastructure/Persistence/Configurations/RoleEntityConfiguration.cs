@@ -11,8 +11,10 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
   {
     builder.HasKey(r => r.Id);
 
-    builder.Property(r => r.Name)
-      .HasColumnName("role_name")
+    builder.Property(r => r.Name).HasColumnName("role_name").HasMaxLength(30).IsRequired();
+
+    builder.Property(r => r.Type)
+      .HasColumnName("role_type")
       .HasConversion(
         type => type.ToString(),
         dbStatus => (RoleType)Enum.Parse(typeof(RoleType), dbStatus));

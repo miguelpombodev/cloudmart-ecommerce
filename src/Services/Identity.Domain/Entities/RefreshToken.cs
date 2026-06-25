@@ -40,7 +40,7 @@ public class RefreshToken
 
   public bool IsActive => !IsRevoked && !IsExpired;
 
-  public static RefreshToken Create(Guid userId, DateTime expiresAt) =>
+  public static RefreshToken Create(Guid userId, DateTimeOffset expiresAt) =>
     new(Guid.NewGuid(), userId, expiresAt, DateTimeOffset.UtcNow, false, null);
 
   public void RevokeToken()

@@ -1,17 +1,10 @@
 using System.Text.RegularExpressions;
-
 using BuildingBlocks.Exceptions;
 
 namespace Identity.Domain.ValueObject;
 
 public class CompleteName : BuildingBlocks.Abstractions.ValueObject
 {
-  public string FirstName { get; }
-
-  public string LastName { get; }
-
-  public string Initials => $"{Char.ToUpper(FirstName[0])} {Char.ToUpper(LastName[0])}";
-
   private CompleteName()
   {
     FirstName = null!;
@@ -23,6 +16,12 @@ public class CompleteName : BuildingBlocks.Abstractions.ValueObject
     FirstName = firstName;
     LastName = lastName;
   }
+
+  public string FirstName { get; }
+
+  public string LastName { get; }
+
+  public string Initials => $"{char.ToUpper(FirstName[0])}{char.ToUpper(LastName[0])}";
 
   public static CompleteName Create(string firstName, string lastName)
   {
