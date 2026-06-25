@@ -52,7 +52,7 @@ public class User : Aggregate<Guid>
 
   public void Revoke()
   {
-    foreach (RefreshToken tokens in _refreshTokens)
+    foreach (RefreshToken tokens in _refreshTokens.Where(token => token.RevokedAt is null))
     {
       tokens.RevokeToken();
     }
