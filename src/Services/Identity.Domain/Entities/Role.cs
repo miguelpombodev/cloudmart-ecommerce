@@ -8,26 +8,31 @@ public class Role : Entity<Guid>
 {
   private Role()
   {
+    Name = null!;
     Description = null!;
   }
 
-  private Role(RoleType name, string description)
+  private Role(string name, string description, RoleType roleType)
   {
     Description = description;
     Name = name;
+    Type = roleType;
   }
 
-  public RoleType Name { get; private set; }
+  public string Name { get; set; }
 
   public string Description { get; private set; }
 
-  public static Role Create(string description, RoleType name = RoleType.Customer)
+  public RoleType Type { get; private set; }
+
+
+  public static Role Create(string description, RoleType type = RoleType.Customer)
   {
     if (string.IsNullOrWhiteSpace(description))
     {
       throw new DomainException("Token or Description cannot be null or whitespaced");
     }
 
-    return new Role(name, description) { Id = Guid.NewGuid() };
+    return new Role(type.ToString(), description, type) { Id = Guid.NewGuid() };
   }
 }

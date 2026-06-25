@@ -32,5 +32,8 @@
 	<Folder Name="/Solution Items/">
 		<File Path="..\.editorconfig" />
 	</Folder>
+	<Folder Name="/Tests/">
+		<Project Path="Identity.Tests/Identity.Tests.csproj" />
+	</Folder>
 
 </Solution>

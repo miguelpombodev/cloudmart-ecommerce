@@ -7,11 +7,11 @@ public interface IEntity<T> : IEntity
 
 public interface IEntity
 {
-  DateTime? CreatedAt { get; set; }
+  DateTimeOffset? CreatedAt { get; set; }
 
   string? CreatedBy { get; set; }
 
-  DateTime? UpdatedAt { get; set; }
+  DateTimeOffset? UpdatedAt { get; set; }
 
   string? UpdatedBy { get; set; }
 }
