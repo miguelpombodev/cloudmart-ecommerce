@@ -3,7 +3,7 @@ using Scalar.AspNetCore;
 
 namespace Cloudmart.Catalog;
 
-public static class DependencyInjectionExtensions
+internal static class DependencyInjectionExtensions
 {
   public static IServiceCollection AddApiServices(this IServiceCollection services)
   {
