@@ -28,7 +28,7 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test --no-build \
+          dotnet test src --no-build \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage
