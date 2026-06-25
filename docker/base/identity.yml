@@ -1,8 +1,24 @@
 services:
   identity-api:
     image: cloudmart/identity-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: ../src/Services/Identity.API
+    restart: unless-stopped
+    ports:
+      - "6000:8080"
+      - "6063:8081"
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__CatalogDb: "Host=identity-db;Database=IdentityDB;Username=identity;Password=postgres"
+      Redis__ConnectionString: "redis:6379,password=${REDIS_PASSWORD}"
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      - identity-db
+      - redis
+      - rabbitmq
     networks:
       - cloudmart_net
 
