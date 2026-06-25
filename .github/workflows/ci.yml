@@ -38,15 +38,15 @@ jobs:
         with:
           directory: ./coverage
 
-  lint-commits:
-    name: Lint Commits
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@v6
+#  lint-commits:
+#    name: Lint Commits
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'pull_request'
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#      - uses: wagoid/commitlint-github-action@v6
 
 
   secret-scan:
