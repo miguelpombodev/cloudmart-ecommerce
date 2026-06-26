@@ -13,22 +13,27 @@ public sealed class RegisterUserEndpoint : ICarterModule
   public void AddRoutes(IEndpointRouteBuilder app)
   {
     app.MapPost("/register", async (RegisterUserRequest request, ISender sender) =>
-    {
-      RegisterUserCommand command = request.Adapt<RegisterUserCommand>();
-
-      Result<RegisterUserResponse> result = await sender.Send(command);
-
-      if (result.IsFailure)
       {
-        return Results.Problem(
-          statusCode: result.Error.StatusCode,
-          detail: result.Error.Description,
-          title: result.Error.InternalCode);
-      }
+        RegisterUserCommand command = request.Adapt<RegisterUserCommand>();
 
-      RegisterUserResponse response = result.Value.Adapt<RegisterUserResponse>();
+        Result<RegisterUserResponse> result = await sender.Send(command);
 
-      return Results.Created($"/{response.Id}", response);
-    });
+        if (result.IsFailure)
+        {
+          return Results.Problem(
+            statusCode: result.Error.StatusCode,
+            detail: result.Error.Description,
+            title: result.Error.InternalCode);
+        }
+
+        RegisterUserResponse response = result.Value.Adapt<RegisterUserResponse>();
+
+        return Results.Created($"/{response.Id}", response);
+      })
+      .WithName("RegisterUser")
+      .Produces<RegisterUserResponse>(StatusCodes.Status201Created)
+      .ProducesProblem(StatusCodes.Status400BadRequest)
+      .WithSummary("Register User")
+      .WithDescription("Register User");
   }
 }
