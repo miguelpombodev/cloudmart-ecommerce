@@ -1,4 +1,6 @@
+using BuildingBlocks.Abstractions;
 using Carter;
+using Cloudmart.Identity.Services;
 using Scalar.AspNetCore;
 
 namespace Cloudmart.Identity;
@@ -10,6 +12,9 @@ internal static class DependencyInjection
     services.AddRouting();
     services.AddOpenApi();
     services.AddCarter();
+
+    services.AddHttpContextAccessor();
+    services.AddScoped<ICurrentUser, CurrentUser>();
 
     return services;
   }

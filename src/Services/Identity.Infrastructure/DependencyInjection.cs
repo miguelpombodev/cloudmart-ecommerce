@@ -1,4 +1,9 @@
+using BuildingBlocks.Infrastructure;
+using BuildingBlocks.Logging;
+using Identity.Application.Abstractions;
 using Identity.Infrastructure.Persistence;
+using Identity.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +15,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Enrichers.OpenTelemetry;
+using Serilog.Formatting.Compact;
+using Serilog.Sinks.Grafana.Loki;
 
 namespace Identity.Infrastructure;
 
@@ -57,6 +64,36 @@ public static class DependencyInjection
 
 
     return services;
+  }
+
+  public static ConfigureHostBuilder AddHostBuilder(this ConfigureHostBuilder host)
+  {
+    host.UseSerilog((context, services, loggerConfig) =>
+    {
+      loggerConfig
+        .ReadFrom
+        .Configuration(context.Configuration)
+        .Enrich
+        .FromLogContext()
+        .Enrich
+        .WithMachineName()
+        .Enrich
+        .WithEnvironmentName()
+        .Enrich
+        .WithThreadId()
+        .Enrich
+        .WithProperty("ServiceName", "Identity.Api")
+        .Enrich
+        .With<TraceIdEnricher>()
+        .WriteTo
+        .Console(new RenderedCompactJsonFormatter())
+        .WriteTo
+        .GrafanaLoki(
+          context.Configuration["Loki:Url"]!,
+          new[] { new LokiLabel { Key = "service", Value = "identity-api" } });
+    });
+
+    return host;
   }
 
   public static ILoggingBuilder AddLoggingBuilder(
@@ -114,6 +151,14 @@ public static class DependencyInjection
       .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(opts => opts.Endpoint = new Uri(tempoUrl)));
+
+    return services;
+  }
+
+  public static IServiceCollection AddRepositories(this IServiceCollection services)
+  {
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     return services;
   }
