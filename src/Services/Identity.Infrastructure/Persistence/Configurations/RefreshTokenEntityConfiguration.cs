@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Identity.Infrastructure.Persistence.Configurations;
 
-public class RefreshTokenEntityConfiguration: IEntityTypeConfiguration<RefreshToken>
+public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
   public void Configure(EntityTypeBuilder<RefreshToken> builder)
   {
+    builder.ToTable("refresh_tokens", "identity");
     builder.HasKey(rt => rt.Id);
 
     builder.Property(rt => rt.Token).HasColumnName("token_value").HasMaxLength(500).IsRequired();
@@ -17,6 +18,5 @@ public class RefreshTokenEntityConfiguration: IEntityTypeConfiguration<RefreshTo
     builder.Property(rt => rt.ExpiresAt).HasColumnName("expires_at").IsRequired();
 
     builder.HasIndex(rt => rt.Token);
-
   }
 }

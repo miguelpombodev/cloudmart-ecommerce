@@ -8,6 +8,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
 {
   public void Configure(EntityTypeBuilder<User> builder)
   {
+    builder.ToTable("users", "identity");
     builder.HasKey(u => u.Id);
 
     builder.ComplexProperty(
