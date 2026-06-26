@@ -62,7 +62,7 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("refresh_tokens", "identity");
                 });
 
             modelBuilder.Entity("Identity.Domain.Entities.Role", b =>
@@ -111,7 +111,7 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("roles", "identity");
                 });
 
             modelBuilder.Entity("Identity.Domain.Entities.User", b =>
@@ -183,7 +183,7 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
 
                     b.HasIndex("role_id");
 
-                    b.ToTable("Users");
+                    b.ToTable("users", "identity");
                 });
 
             modelBuilder.Entity("Identity.Domain.Entities.RefreshToken", b =>
@@ -219,7 +219,7 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                             b1.HasIndex("Address")
                                 .IsUnique();
 
-                            b1.ToTable("Users");
+                            b1.ToTable("users", "identity");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
