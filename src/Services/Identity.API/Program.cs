@@ -25,3 +25,11 @@ app.UseApiServices();
 app.UseMiddleware<LogEnrichmentMiddleware>();
 
 await app.RunAsync();
+
+/// <summary>
+///   asasasaasas.
+/// </summary>
+// This is only for tests
+public abstract partial class Program
+{
+}

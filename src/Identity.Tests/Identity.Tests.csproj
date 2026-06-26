@@ -25,7 +25,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj"/>
+    <ProjectReference Include="..\Services\Identity.API\Identity.API.csproj"/>
+    <ProjectReference Include="..\Services\Identity.Application\Identity.Application.csproj"/>
     <ProjectReference Include="..\Services\Identity.Domain\Identity.Domain.csproj"/>
+    <ProjectReference Include="..\Services\Identity.Infrastructure\Identity.Infrastructure.csproj"/>
   </ItemGroup>
 
 </Project>
