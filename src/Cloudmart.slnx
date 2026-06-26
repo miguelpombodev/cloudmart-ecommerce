@@ -4,6 +4,7 @@
 	</Folder>
 	<Folder Name="/Services/" />
 	<Folder Name="/Services/Cloudmard.Identity/">
+		<Project Path="Services/Identity.Application/Identity.Application.csproj" />
 		<Project Path="Services/Identity.Domain/Identity.Domain.csproj" />
 		<Project Path="Services/Identity.Infrastructure/Identity.Infrastructure.csproj" />
 		<Project Path="Services\Identity.API\Identity.API.csproj" />
