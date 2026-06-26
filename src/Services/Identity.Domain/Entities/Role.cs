@@ -17,6 +17,10 @@ public class Role : Entity<Guid>
     Description = description;
     Name = name;
     Type = roleType;
+    CreatedAt = DateTimeOffset.UtcNow;
+    CreatedBy = "system";
+    UpdatedAt = DateTimeOffset.UtcNow;
+    UpdatedBy = "system";
   }
 
   public string Name { get; set; }
