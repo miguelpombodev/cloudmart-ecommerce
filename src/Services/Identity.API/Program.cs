@@ -1,3 +1,4 @@
+using Cloudmart.Identity;
 using Identity.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -6,19 +7,15 @@ IConfiguration configuration = builder.Configuration;
 
 builder.Logging.AddLoggingBuilder(configuration);
 
-builder.Services.AddOpenApi();
-
 builder.Services
   .AddInfrastructureServices(configuration)
-  .AddTelemetryServices(configuration);
+  .AddTelemetryServices(configuration)
+  .AddApiServices();
+
+builder.Services.AddMediatR(x => { x.RegisterServicesFromAssemblies(typeof(Program).Assembly); });
 
 WebApplication app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-  app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
+app.UseApiServices();
 
 await app.RunAsync();
