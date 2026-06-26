@@ -9,6 +9,7 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
 {
   public void Configure(EntityTypeBuilder<Role> builder)
   {
+    builder.ToTable("roles", "identity");
     builder.HasKey(r => r.Id);
 
     builder.Property(r => r.Name).HasColumnName("role_name").HasMaxLength(30).IsRequired();
