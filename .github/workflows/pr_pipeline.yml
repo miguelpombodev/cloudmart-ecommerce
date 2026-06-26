@@ -36,6 +36,15 @@ jobs:
         with:
           directory: ./coverage
 
+      - name: .NET Test Reporter
+        uses: bibipkins/dotnet-test-reporter@v1.6.4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-title: 'Unit Test Results'
+          results-path: ./coverage/*.trx
+          coverage-path: ./coverage/coverage.cobertura.xml
+          coverage-threshold: 80
+
 #  lint-commits:
 #    name: Lint Commits
 #    runs-on: ubuntu-latest
