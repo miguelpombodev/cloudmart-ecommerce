@@ -26,10 +26,12 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test src --no-build \
-            --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage
+          dotnet test src \                                                                                                                                        6s 18:07:55
+          --no-build \
+          --configuration Release \
+          --logger "trx;LogFileName=results.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -42,7 +44,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: 'Unit Test Results'
           results-path: ./coverage/*.trx
-          coverage-path: ./coverage/coverage.cobertura.xml
+          coverage-path: ./coverage/**/**/pombo/coverage.cobertura.xml
           coverage-threshold: 80
 
 #  lint-commits:
