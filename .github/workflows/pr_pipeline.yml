@@ -25,13 +25,12 @@ jobs:
         run: dotnet build src --no-restore --configuration Release
 
       - name: Test
-        run: |
-          dotnet test src \                                                                                                                                        6s 18:07:55
-          --no-build \
-          --configuration Release \
-          --logger "trx;LogFileName=results.trx" \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./coverage
+        run: dotnet test src \                                                                                                                                           18:15:07
+            --no-build \
+            --configuration Release \
+            --logger "trx;LogFileName=results.trx" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
