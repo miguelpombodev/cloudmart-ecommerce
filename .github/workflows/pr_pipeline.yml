@@ -2,7 +2,7 @@ name: Pull Request Pipeline
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -10,11 +10,9 @@ permissions:
   checks: write
 
 jobs:
-
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -31,37 +29,54 @@ jobs:
 
       - name: Test
         run: |
-            dotnet test src/Cloudmart.slnx \
-              --no-build \
-              --configuration Debug \
-              --logger "trx;LogFileName=results.trx" \
-              --collect:"XPlat Code Coverage" \
-              --results-directory ./coverage
+          dotnet test src/Cloudmart.slnx \
+            --no-build \
+            --configuration Debug \
+            --logger "trx;LogFileName=results.trx" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage
 
-      - name: Upload coverage
+      - name: Merge Coverage Reports
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"./coverage/**/coverage.cobertura.xml" \
+            -targetdir:"./coverage/merged" \
+            -reporttypes:"Cobertura;MarkdownSummaryGithub"
+
+      - name: Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage/merged/Cobertura.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: 'Unit Test Results'
+          path: 'coverage/**/results.trx'
+          reporter: 'dotnet-trx'
+          fail-on-error: false
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           directory: ./coverage
-
-      - name: .NET Test Reporter
-        uses: bibipkins/dotnet-test-reporter@v1.6.4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-title: 'Unit Test Results'
-          results-path: ./coverage/*.trx
-          coverage-path: ./coverage/**/coverage.cobertura.xml
-          coverage-threshold: 80
-
-#  lint-commits:
-#    name: Lint Commits
-#    runs-on: ubuntu-latest
-#    if: github.event_name == 'pull_request'
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#      - uses: wagoid/commitlint-github-action@v6
-
 
   secret-scan:
     name: Secret Scanning
@@ -74,3 +89,14 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --only-verified
+
+
+#  lint-commits:
+#    name: Lint Commits
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'pull_request'
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#      - uses: wagoid/commitlint-github-action@v6
