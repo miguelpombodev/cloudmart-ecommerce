@@ -1,15 +1,17 @@
 using Identity.Domain.Entities;
 using Identity.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 
 namespace Identity.Tests.Infrastructure.Common;
 
-public sealed class PostgreSqlFixture : IAsyncLifetime
+public sealed class PostgreSqlFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-#pragma warning disable CS0618 // Type or member is obsolete
   private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
-#pragma warning restore CS0618 // Type or member is obsolete
     .WithImage("postgres:16-alpine")
     .WithDatabase("IdentityDB_Test")
     .WithUsername("identity_test")
@@ -37,8 +39,8 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
     await context.SaveChangesAsync();
   }
 
-  public async Task DisposeAsync() =>
-    await _container.DisposeAsync();
+  public new async Task DisposeAsync() =>
+    await _container.StopAsync();
 
   /// <summary>
   ///   Cria um novo DbContext apontando para o container.
@@ -52,5 +54,21 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
       .Options;
 
     return new ApplicationDbContext(options);
+  }
+
+  protected override void ConfigureWebHost(IWebHostBuilder builder)
+  {
+    builder.ConfigureTestServices(services =>
+    {
+      ServiceDescriptor? descriptor =
+        services.SingleOrDefault(s => s.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
+
+      if (descriptor is not null)
+      {
+        services.Remove(descriptor);
+      }
+
+      services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(_container.GetConnectionString()); });
+    });
   }
 }

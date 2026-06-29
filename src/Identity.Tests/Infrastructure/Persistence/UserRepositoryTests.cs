@@ -2,6 +2,7 @@ using FluentAssertions;
 using Identity.Domain.Entities;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
+using Identity.Tests.Domain.Builder;
 using Identity.Tests.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +32,27 @@ public sealed class UserRepositoryTests : IClassFixture<PostgreSqlFixture>, IAsy
   public Task DisposeAsync() =>
     Task.CompletedTask;
 
+  [Fact]
+  public async Task FindByEmail_WhenUserExists_ShouldReturnUser()
+  {
+    await using ApplicationDbContext context = _fixture.CreateContext();
+    var repository = new UserRepository(context);
+
+    Role? role = await context.Roles.FirstOrDefaultAsync(role => role.Name == "Customer");
+
+    User user = new UserBuilder()
+      .WithEmail("findme@example.com")
+      .WithRole(role!)
+      .Build();
+
+    await repository.AddAsync(user);
+    await context.SaveChangesAsync();
+
+    User? found = await repository.FindByEmail("findme@example.com");
+
+    found.Should().NotBeNull();
+    found!.Id.Should().Be(user.Id);
+  }
 
   [Fact]
   public async Task FindByEmail_WhenUserDoesNotExist_ShouldReturnNull()
