@@ -1,4 +1,5 @@
 using Identity.Domain.Entities;
+using Identity.Domain.Enums;
 using Identity.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -34,7 +35,7 @@ public sealed class PostgreSqlFixture : WebApplicationFactory<Program>, IAsyncLi
     await using var context = new ApplicationDbContext(options);
     await context.Database.MigrateAsync();
 
-    DefaultCustomerRole = Role.Create("Default customer role");
+    DefaultCustomerRole = Role.CreateSeed(Guid.Parse("00000000-0000-0000-0000-000000000001"),"Test role", "Test role", RoleType.Customer);
     context.Roles.Add(DefaultCustomerRole);
     await context.SaveChangesAsync();
   }
