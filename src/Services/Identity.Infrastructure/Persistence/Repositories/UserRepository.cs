@@ -16,4 +16,7 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
 
   public async Task<User?> FindByEmail(string email) =>
     await _context.Users.AsNoTracking().FirstOrDefaultAsync(user => user.Email.Address == email);
+
+  public async Task<Role> FindRoleByName(string roleName, CancellationToken ct) =>
+    await _context.Roles.SingleAsync(role => role.Name.Equals(roleName), ct)!;
 }
