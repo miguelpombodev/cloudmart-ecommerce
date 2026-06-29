@@ -23,10 +23,14 @@ public class Review : BuildingBlocks.Abstractions.ValueObject
   public static Review Create(string authorName, string description, float rate = 0)
   {
     if (string.IsNullOrWhiteSpace(authorName))
+    {
       throw new DomainException("Author Name cannot be empty");
+    }
 
     if (rate >= 5.1)
+    {
       throw new DomainException("Review Rate cannot be higher or equal that 5.1");
+    }
 
     return new(authorName, description, rate);
   }

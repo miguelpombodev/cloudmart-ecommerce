@@ -9,13 +9,13 @@ WebApplication app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.MapOpenApi();
+  app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
 
 
 app.MapGet("/", () => { return new { message = "Hello World!" }; })
-	.WithName("GetWeatherForecast");
+    .WithName("GetWeatherForecast");
 
 await app.RunAsync();
