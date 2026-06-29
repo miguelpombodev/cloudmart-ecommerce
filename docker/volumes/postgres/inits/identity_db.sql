@@ -18,8 +18,7 @@ DATABASE "IdentityDB"
 COMMENT
 ON DATABASE "IdentityDB" IS 'Cloudmart - Identity Service';
 
-\connect
-"IdentityDB"
+\connect "IdentityDB";
 
 CREATE
 EXTENSION IF NOT EXISTS "uuid-ossp"; -- UUIDs
@@ -178,6 +177,7 @@ SYSTEM SET track_wal_io_timing  = 'on';
 
 SELECT pg_reload_conf();
 -- aplica sem restart
+
 
 -- OutboxMessages Table
 CREATE TABLE IF NOT EXISTS identity.outbox_messages

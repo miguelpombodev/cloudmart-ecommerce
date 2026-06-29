@@ -18,8 +18,7 @@ DATABASE "CatalogDB"
 COMMENT
 ON DATABASE "CatalogDB" IS 'Cloudmart - Catalog Service';
 
-\connect
-"CatalogDB"
+\connect "CatalogDB";
 
 CREATE
 EXTENSION IF NOT EXISTS "uuid-ossp"; -- UUIDs

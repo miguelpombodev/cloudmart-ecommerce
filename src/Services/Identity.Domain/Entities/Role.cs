@@ -17,10 +17,6 @@ public class Role : Entity<Guid>
     Description = description;
     Name = name;
     Type = roleType;
-    CreatedAt = DateTimeOffset.UtcNow;
-    CreatedBy = "system";
-    UpdatedAt = DateTimeOffset.UtcNow;
-    UpdatedBy = "system";
   }
 
   public string Name { get; set; }
@@ -38,5 +34,20 @@ public class Role : Entity<Guid>
     }
 
     return new Role(type.ToString(), description, type) { Id = Guid.NewGuid() };
+  }
+
+  public static Role CreateSeed(Guid id, string name, string description, RoleType type)
+  {
+    return new Role
+    {
+      Id = id,
+      Name = name,
+      Description = description,
+      Type = type,
+      CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+      UpdatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+      CreatedBy = "system",
+      UpdatedBy = "system"
+    };
   }
 }

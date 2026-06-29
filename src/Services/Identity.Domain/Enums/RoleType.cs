@@ -2,7 +2,15 @@ namespace Identity.Domain.Enums;
 
 public enum RoleType
 {
-  Admin,
+  Customer = 1,
 
-  Customer
+  Admin = 2,
+
+  Member = 3,
+
+  Manager = 4,
+
+  Seller = 5,
+
+  Support = 6
 }
