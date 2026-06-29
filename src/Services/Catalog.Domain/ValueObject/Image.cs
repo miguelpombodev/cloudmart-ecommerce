@@ -24,7 +24,9 @@ public sealed class Image : BuildingBlocks.Abstractions.ValueObject
   public static Image Create(string url, string altText, bool isPrimary = false)
   {
     if (string.IsNullOrWhiteSpace(url))
+    {
       throw new DomainException("Image URL cannot be empty");
+    }
 
     return new(url, altText, isPrimary);
   }
