@@ -4,11 +4,13 @@ public class RefreshToken
 {
   private RefreshToken()
   {
+    Token = null!;
   }
 
   private RefreshToken(
     Guid id,
     Guid userId,
+    string hashedToken,
     DateTimeOffset expiresAt,
     DateTimeOffset createdAt,
     bool isRevoked,
@@ -16,6 +18,7 @@ public class RefreshToken
   {
     Id = id;
     UserId = userId;
+    Token = hashedToken;
     ExpiresAt = expiresAt;
     CreatedAt = createdAt;
     IsRevoked = isRevoked;
@@ -34,14 +37,14 @@ public class RefreshToken
 
   public DateTimeOffset? RevokedAt { get; private set; }
 
-  public string Token { get; private set; } = null!;
+  public string Token { get; private set; }
 
   public bool IsExpired => DateTimeOffset.UtcNow > ExpiresAt;
 
   public bool IsActive => !IsRevoked && !IsExpired;
 
-  public static RefreshToken Create(Guid userId, DateTimeOffset expiresAt) =>
-    new(Guid.NewGuid(), userId, expiresAt, DateTimeOffset.UtcNow, false, null);
+  public static RefreshToken Create(Guid userId, string hashedToken, DateTimeOffset expiresAt) =>
+    new(Guid.NewGuid(), userId, hashedToken, expiresAt, DateTimeOffset.UtcNow, false, null);
 
   public void RevokeToken()
   {

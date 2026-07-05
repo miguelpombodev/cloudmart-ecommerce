@@ -5,4 +5,5 @@ namespace Identity.Application.Features.Users.Login;
 
 public sealed record LoginCommand(
   string Email,
-  string Password) : ICommand<Result<LoginResponse>>;
+  string Password,
+  string ClientIp = "") : ICommand<Result<LoginResponse>>;

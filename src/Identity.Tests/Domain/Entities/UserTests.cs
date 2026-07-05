@@ -58,7 +58,7 @@ public class UserTests
   public void AddRefreshToken_ShouldAddTokenCollection()
   {
     User user = new UserBuilder().Build();
-    var token = RefreshToken.Create(user.Id, DateTimeOffset.UtcNow.AddDays(7));
+    var token = RefreshToken.Create(user.Id, "", DateTimeOffset.UtcNow.AddDays(7));
 
     user.AddRefreshToken(token);
 
@@ -70,9 +70,9 @@ public class UserTests
   {
     // Arrange
     User user = new UserBuilder().Build();
-    var tokenA = RefreshToken.Create(user.Id, DateTimeOffset.UtcNow.AddDays(7));
-    var tokenB = RefreshToken.Create(user.Id, DateTimeOffset.UtcNow.AddDays(7));
-    var tokenC = RefreshToken.Create(user.Id, DateTimeOffset.UtcNow.AddDays(7));
+    var tokenA = RefreshToken.Create(user.Id, "", DateTimeOffset.UtcNow.AddDays(7));
+    var tokenB = RefreshToken.Create(user.Id, "", DateTimeOffset.UtcNow.AddDays(7));
+    var tokenC = RefreshToken.Create(user.Id, "", DateTimeOffset.UtcNow.AddDays(7));
 
     // Act
     user.AddRefreshToken(tokenA);
@@ -100,7 +100,7 @@ public class UserTests
   public void Revoke_ShouldNotAffectAlreadyRevokedTokens()
   {
     User user = new UserBuilder().Build();
-    var token = RefreshToken.Create(user.Id, DateTimeOffset.UtcNow.AddDays(7));
+    var token = RefreshToken.Create(user.Id, "", DateTimeOffset.UtcNow.AddDays(7));
     user.AddRefreshToken(token);
 
     user.Revoke();

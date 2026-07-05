@@ -1,5 +1,4 @@
 using Cloudmart.Identity;
-using Cloudmart.Identity.Middlewares;
 using Identity.Application;
 using Identity.Infrastructure;
 
@@ -15,14 +14,14 @@ builder.Services
   .AddInfrastructureServices(configuration)
   .AddTelemetryServices(configuration)
   .AddRepositories()
+  .AddProviderOptions(configuration)
+  .AddProviders(configuration)
   .AddApplicationServices()
   .AddApiServices();
 
 WebApplication app = builder.Build();
 
 app.UseApiServices();
-
-app.UseMiddleware<LogEnrichmentMiddleware>();
 
 await app.RunAsync();
 

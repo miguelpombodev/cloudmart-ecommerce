@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using Carter;
+using Cloudmart.Identity.Middlewares;
 using Cloudmart.Identity.Services;
 using Scalar.AspNetCore;
 
@@ -12,6 +13,8 @@ internal static class DependencyInjection
     services.AddRouting();
     services.AddOpenApi();
     services.AddCarter();
+
+    services.AddTransient<GlobalExceptionHandlerMiddleware>();
 
     services.AddHttpContextAccessor();
     services.AddScoped<ICurrentUser, CurrentUser>();
@@ -27,8 +30,13 @@ internal static class DependencyInjection
     if (app.Environment.IsDevelopment())
     {
       app.MapOpenApi();
-      app.MapScalarApiReference(ConfigureScalar);
+      app.MapScalarApiReference(ConfigureScalar).AllowAnonymous();
     }
+
+    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+    app.UseMiddleware<LogEnrichmentMiddleware>();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     return app;
   }
