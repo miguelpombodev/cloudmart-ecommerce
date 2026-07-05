@@ -60,6 +60,12 @@ public class User : Aggregate<Guid>
     IsActive = false;
   }
 
+  public string RetrieveMaskedEmail()
+  {
+    string address = Email.Address;
+    return $"{address.Substring(address.Length - 4)}{new string('*', address.Length)}";
+  }
+
   public void AddRefreshToken(RefreshToken token) =>
     _refreshTokens.Add(token);
 }

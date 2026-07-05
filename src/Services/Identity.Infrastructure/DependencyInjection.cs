@@ -1,13 +1,22 @@
+using System.Text;
+using System.Text.Json;
 using BuildingBlocks.Infrastructure;
 using BuildingBlocks.Logging;
+using Cloudmart.Identity.Configurations;
 using Identity.Application.Abstractions;
+using Identity.Application.Abstractions.Auth;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
+using Identity.Infrastructure.Providers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -159,6 +168,97 @@ public static class DependencyInjection
   {
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+    return services;
+  }
+
+  public static IServiceCollection AddProviders(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddScoped<ITokenService, TokenService>();
+
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+      .AddJwtBearer(options =>
+      {
+        JwtOptions jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = jwtOptions.Issuer,
+          ValidAudience = jwtOptions.Audience,
+          IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+          ClockSkew = TimeSpan.FromSeconds(30)
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+          OnChallenge = context =>
+          {
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+
+            string body = JsonSerializer.Serialize(new
+            {
+              type = "https://tools.ietf.org/html/rfc7235#section-3.1",
+              title = "Unauthorized",
+              status = 401,
+              detail =
+                "A valid Bearer token is required"
+            });
+
+            return context.Response.WriteAsync(body);
+          },
+          OnForbidden = context =>
+          {
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+
+            string body = JsonSerializer.Serialize(new
+            {
+              type = "https://tools.ietf.org/html/rfc7235#section-3.1",
+              title = "Forbidden",
+              status = 403,
+              detail =
+                "You do not have permission to access this resource"
+            });
+
+            return context.Response.WriteAsync(body);
+          }
+        };
+      });
+
+    bool isDevelopment = configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
+
+    services.AddAuthorization(options =>
+    {
+      options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+      options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("Admin"));
+      options.AddPolicy(Policies.CatalogManagement, policy => policy.RequireRole("Admin", "Manager", "Seller"));
+
+      options.AddPolicy(
+        Policies.VerifiedSeller,
+        policy => policy.RequireRole("Seller").RequireClaim("email_verified", "true"));
+
+      if (!isDevelopment)
+      {
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+          .RequireAuthenticatedUser()
+          .Build();
+      }
+    });
+
+    return services;
+  }
+
+  public static IServiceCollection AddProviderOptions(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
     return services;
   }

@@ -16,23 +16,36 @@ public sealed class LoginEndpoint : ICarterModule
   /// <param name="app">Group for endpoints URL.</param>
   public void AddRoutes(IEndpointRouteBuilder app)
   {
-    app.MapPost("/login", async (LoginRequest request, ISender sender) =>
-    {
-      LoginCommand command = request.Adapt<LoginCommand>();
-
-      Result<LoginResponse> result = await sender.Send(command);
-
-      if (result.IsFailure)
+    app.MapPost("/login", async (
+        LoginRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken ct) =>
       {
-        return Results.Problem(
-          statusCode: result.Error.StatusCode,
-          detail: result.Error.Description,
-          title: result.Error.InternalCode);
-      }
+        string clientIp = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
+                       httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-      LoginResponse response = result.Value.Adapt<LoginResponse>();
+        LoginCommand command = request.Adapt<LoginCommand>() with { ClientIp = clientIp };
 
-      return Results.Ok(response);
-    }).WithDescription("Login endpoint");
+        Result<LoginResponse> result = await sender.Send(command, ct);
+
+        if (result.IsFailure)
+        {
+          return Results.Problem(
+            statusCode: result.Error.StatusCode,
+            detail: result.Error.Description,
+            title: result.Error.InternalCode);
+        }
+
+        LoginResponse response = result.Value.Adapt<LoginResponse>();
+
+        return Results.Ok(response);
+      })
+      .WithName("Login")
+      .AllowAnonymous()
+      .Produces<LoginResponse>(StatusCodes.Status200OK)
+      .ProducesProblem(StatusCodes.Status401Unauthorized)
+      .WithSummary("Authenticate user and issue tokens")
+      .AllowAnonymous();
   }
 }
