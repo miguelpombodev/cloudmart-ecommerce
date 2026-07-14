@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Identity.Application.Abstractions.Auth;
+using Identity.Application.Abstractions.Options;
 using Identity.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;

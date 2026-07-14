@@ -1,4 +1,3 @@
-using BuildingBlocks.Abstractions;
 using BuildingBlocks.Domain;
 using Identity.Domain.ValueObject;
 
@@ -8,6 +7,8 @@ public class User : Aggregate<Guid>
 {
   private readonly List<RefreshToken> _refreshTokens = [];
 
+  private readonly List<UserAuthenticationProvider> _userAuthenticationProviders = [];
+
   private User()
   {
     Name = null!;
@@ -16,7 +17,7 @@ public class User : Aggregate<Guid>
     Role = null!;
   }
 
-  private User(CompleteName name, Email email, Password password, Role role)
+  private User(CompleteName name, Email email, Password? password, Role role)
   {
     Name = name;
     Email = email;
@@ -29,17 +30,20 @@ public class User : Aggregate<Guid>
 
   public CompleteName Name { get; private set; }
 
-  public Email Email { get; private set; }
+  public Email Email { get; }
 
-  public Password Password { get; private set; }
+  public Password? Password { get; private set; }
 
   public Role Role { get; private set; }
 
   public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
+  public IReadOnlyList<UserAuthenticationProvider> UserAuthenticationProviders =>
+    _userAuthenticationProviders.AsReadOnly();
+
   public bool IsActive { get; private set; }
 
-  public static Result<User> Create(
+  public static User Create(
     CompleteName name,
     Email email,
     Password password,
@@ -63,6 +67,7 @@ public class User : Aggregate<Guid>
   public string RetrieveMaskedEmail()
   {
     string address = Email.Address;
+
     return $"{address.Substring(address.Length - 4)}{new string('*', address.Length)}";
   }
 

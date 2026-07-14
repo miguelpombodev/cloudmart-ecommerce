@@ -35,7 +35,7 @@ public sealed class UserBuilder
 
   private CompleteName _name = CompleteName.Create("Default", "User");
 
-  private Password _password = Password.Create("DefaultPass@123");
+  private Password _password = Password.CreateWithNoProvider("DefaultPass@123");
 
   private Role _role = Role.Create("Default customer role");
 
@@ -55,7 +55,7 @@ public sealed class UserBuilder
 
   public UserBuilder WithPassword(string plainPassword)
   {
-    _password = Password.Create(plainPassword);
+    _password = Password.CreateWithNoProvider(plainPassword);
 
     return this;
   }

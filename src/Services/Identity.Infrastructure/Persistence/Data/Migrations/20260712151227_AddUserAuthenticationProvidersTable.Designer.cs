@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Identity.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Identity.Infrastructure.Persistence.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260712151227_AddUserAuthenticationProvidersTable")]
+    partial class AddUserAuthenticationProvidersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,37 +253,27 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("user")
-                        .HasColumnName("created_by");
+                        .HasColumnType("text");
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("VARCHAR(20)")
-                        .HasColumnName("provider_name");
+                        .HasColumnType("text")
+                        .HasColumnName("VARCHAR(20)");
 
                     b.Property<string>("ProviderUserId")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("provider_user_id");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("user")
-                        .HasColumnName("updated_by");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -341,6 +334,7 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("HashedValue")
+                                .IsRequired()
                                 .HasMaxLength(500)
                                 .HasColumnType("character varying(500)")
                                 .HasColumnName("password_hash");
@@ -367,28 +361,6 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                         .WithMany("UserAuthenticationProviders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("Identity.Domain.ValueObject.Email", "Email", b1 =>
-                        {
-                            b1.Property<Guid>("UserAuthenticationProviderId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Address")
-                                .IsRequired()
-                                .HasMaxLength(320)
-                                .HasColumnType("character varying(320)")
-                                .HasColumnName("email");
-
-                            b1.HasKey("UserAuthenticationProviderId");
-
-                            b1.ToTable("user_oauth_providers");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserAuthenticationProviderId");
-                        });
-
-                    b.Navigation("Email")
                         .IsRequired();
                 });
 

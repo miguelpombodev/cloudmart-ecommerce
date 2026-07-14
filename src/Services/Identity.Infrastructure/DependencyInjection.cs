@@ -5,9 +5,11 @@ using BuildingBlocks.Logging;
 using Cloudmart.Identity.Configurations;
 using Identity.Application.Abstractions;
 using Identity.Application.Abstractions.Auth;
+using Identity.Application.Abstractions.Options;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Providers;
+using Identity.Infrastructure.Providers.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +33,8 @@ namespace Identity.Infrastructure;
 
 public static class DependencyInjection
 {
+  private const string ExternalProvidersSectionName = "Authentication";
+
   public static IServiceCollection AddInfrastructureServices(
     this IServiceCollection services,
     IConfiguration configuration)
@@ -176,6 +180,10 @@ public static class DependencyInjection
   {
     services.AddScoped<ITokenService, TokenService>();
 
+    services.AddHttpClient<IExternalIdentityProvider, GoogleAuthService>(client =>
+      client.BaseAddress = new Uri("https://oauth2.googleapis.com/")
+    );
+
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
       .AddJwtBearer(options =>
       {
@@ -259,6 +267,7 @@ public static class DependencyInjection
   public static IServiceCollection AddProviderOptions(this IServiceCollection services, IConfiguration configuration)
   {
     services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+    services.Configure<ExternalProvidersOptions>(configuration.GetSection(ExternalProvidersSectionName));
 
     return services;
   }

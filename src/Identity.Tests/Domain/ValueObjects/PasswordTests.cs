@@ -10,7 +10,7 @@ public class PasswordTests
   public void Create_WithValidStringPassword_ShouldSucceed()
   {
     // Act
-    Func<Password> act = () => Password.Create("Senha@123");
+    Func<Password> act = () => Password.CreateWithNoProvider("Senha@123");
 
     // Assert
     act.Should().NotThrow();
@@ -23,7 +23,7 @@ public class PasswordTests
   public void Create_WithTooShortPassword_ShouldThrowDomainException(string shortPassword)
   {
     // Act
-    Func<Password> act = () => Password.Create(shortPassword);
+    Func<Password> act = () => Password.CreateWithNoProvider(shortPassword);
 
     // Assert
     act.Should().Throw<DomainException>().WithMessage("Password must have at least 8 characters");
@@ -38,7 +38,7 @@ public class PasswordTests
   public void Create_WithPasswordMissingComplexityRule_ShouldThrowDomainException(string weakPassword)
   {
     // Act
-    Func<Password> act = () => Password.Create(weakPassword);
+    Func<Password> act = () => Password.CreateWithNoProvider(weakPassword);
 
     // Assert
     act.Should().Throw<DomainException>()
@@ -51,7 +51,7 @@ public class PasswordTests
   {
     // Arrange
     const string plainPassword = "Senha@123";
-    var password = Password.Create(plainPassword);
+    var password = Password.CreateWithNoProvider(plainPassword);
 
     // Assert
 
@@ -66,7 +66,7 @@ public class PasswordTests
   {
     // Arrange
     const string plainPassword = "Senha@123";
-    var password = Password.Create(plainPassword);
+    var password = Password.CreateWithNoProvider(plainPassword);
 
     // Act
     bool isValid = password.Verify(plainPassword);
@@ -77,7 +77,7 @@ public class PasswordTests
   [Fact]
   public void Verify_WithIncorrectPlainPassword_ShouldReturnFalse()
   {
-    var password = Password.Create("Senha@123");
+    var password = Password.CreateWithNoProvider("Senha@123");
 
     bool isValid = password.Verify("WrongPassword@456");
 
@@ -89,8 +89,8 @@ public class PasswordTests
   {
     const string plainPassword = "Senha@123";
 
-    var passwordA = Password.Create(plainPassword);
-    var passwordB = Password.Create(plainPassword);
+    var passwordA = Password.CreateWithNoProvider(plainPassword);
+    var passwordB = Password.CreateWithNoProvider(plainPassword);
 
     passwordA.HashedValue.Should().NotBe(passwordB.HashedValue);
 
@@ -103,8 +103,8 @@ public class PasswordTests
   {
     const string plainPassword = "Senha@123";
 
-    var passwordA = Password.Create(plainPassword);
-    var passwordB = Password.Create(plainPassword);
+    var passwordA = Password.CreateWithNoProvider(plainPassword);
+    var passwordB = Password.CreateWithNoProvider(plainPassword);
 
     passwordA.Should().NotBe(passwordB);
   }

@@ -15,6 +15,31 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
     _context = ctx;
   }
 
+  public async Task<UserAuthenticationProvider> AddUserAuthenticationProviderAsync(
+    UserAuthenticationProvider userAuthenticationProvider,
+    CancellationToken ct)
+  {
+    EntityEntry<UserAuthenticationProvider> insertStmt =
+      await _context.Set<UserAuthenticationProvider>().AddAsync(userAuthenticationProvider, ct);
+
+    return insertStmt.Entity;
+  }
+
+  public async Task<UserAuthenticationProvider?> FindUserAuthenticationByProviderAsync(
+    string emailAddress,
+    string provider,
+    CancellationToken ct)
+  {
+    UserAuthenticationProvider? result = await _context.Set<UserAuthenticationProvider>()
+      .FirstOrDefaultAsync(
+        uap => uap.Provider == provider.ToUpperInvariant() &&
+               uap.Email.Address ==
+               emailAddress,
+        ct);
+
+    return result;
+  }
+
   public async Task<User?> FindByEmail(string email) =>
     await _context.Users.Include(u => u.Role).AsNoTracking().FirstOrDefaultAsync(user => user.Email.Address == email);
 

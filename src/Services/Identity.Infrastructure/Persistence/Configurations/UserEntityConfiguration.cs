@@ -40,16 +40,14 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
         email.HasIndex(e => e.Address).IsUnique();
       });
 
-    builder.ComplexProperty(
+    builder.OwnsOne(
       u => u.Password,
       password =>
       {
         password.Property(p => p.HashedValue)
           .HasColumnName("password_hash")
-          .HasMaxLength(500)
-          .IsRequired();
-      }
-    );
+          .HasMaxLength(500);
+      });
 
     builder.Property(u => u.IsActive).HasColumnName("is_active").HasDefaultValue(true).IsRequired();
     builder.Property(u => u.CreatedAt).HasColumnName("created_at").IsRequired();
@@ -61,5 +59,8 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
 
     builder.Metadata.FindNavigation(nameof(User.RefreshTokens))!.SetPropertyAccessMode(PropertyAccessMode.Field);
     builder.HasMany(u => u.RefreshTokens).WithOne().HasForeignKey(rt => rt.UserId).OnDelete(DeleteBehavior.Cascade);
+
+    builder.HasMany(user => user.UserAuthenticationProviders).WithOne().HasForeignKey(uap => uap.UserId)
+      .OnDelete(DeleteBehavior.Cascade);
   }
 }

@@ -4,6 +4,7 @@
     <RootNamespace>Cloudmart.Identity</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>9c3cde7e-99e2-4a8d-9e5e-4b26e80ab938</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
@@ -53,6 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Configurations\" />
+    <Folder Include="Configurations\"/>
   </ItemGroup>
 </Project>

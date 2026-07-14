@@ -40,7 +40,7 @@ public sealed class RegisterUserHandler : ICommandHandler<RegisterUserCommand, R
     }
 
     var completeNameResult = CompleteName.Create(request.FirstName, request.LastName);
-    var passwordResult = Password.Create(request.Password);
+    var passwordResult = Password.CreateWithNoProvider(request.Password);
     var emailResult = Email.Create(request.Email);
 
     Role role = await _repository.FindRoleByName("Customer", cancellationToken);
