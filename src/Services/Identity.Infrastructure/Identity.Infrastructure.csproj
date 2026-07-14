@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj"/>
-    <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
+    <ProjectReference Include="..\Identity.Application\Identity.Application.csproj"/>
     <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Magick.NET.Core"/>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"/>
@@ -27,7 +28,7 @@
     <PackageReference Include="Serilog.Extensions.Logging"/>
     <PackageReference Include="Serilog.Sinks.Console"/>
     <PackageReference Include="Serilog.Sinks.Grafana.Loki"/>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
   </ItemGroup>
 
 </Project>

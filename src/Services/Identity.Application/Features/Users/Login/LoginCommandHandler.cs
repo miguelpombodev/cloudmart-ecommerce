@@ -34,7 +34,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
   {
     User? user = await _repository.FindByEmail(request.Email);
 
-    if (user is null || !user.Password.Verify(request.Password) || !user.IsActive)
+    if (user?.Password is null || !user.Password.Verify(request.Password) || !user.IsActive)
     {
       return Result<LoginResponse>.Failure(Error.Unauthorized("Invalid Credentials"));
     }

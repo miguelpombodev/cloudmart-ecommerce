@@ -14,7 +14,7 @@ public class UserTests
     // Arrange
     var name = CompleteName.Create("João", "Silva");
     var email = Email.Create("joao@example.com");
-    var password = Password.Create("Senha@123");
+    var password = Password.CreateWithNoProvider("Senha@123");
     var role = Role.Create("Default role");
 
     // Act

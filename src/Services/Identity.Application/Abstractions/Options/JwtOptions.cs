@@ -1,4 +1,4 @@
-namespace Identity.Application.Abstractions.Auth;
+namespace Identity.Application.Abstractions.Options;
 
 public sealed class JwtOptions
 {

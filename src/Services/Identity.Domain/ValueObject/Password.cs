@@ -10,14 +10,14 @@ public sealed class Password : BuildingBlocks.Abstractions.ValueObject
     HashedValue = null!;
   }
 
-  private Password(string hashedPassword)
+  private Password(string? hashedPassword)
   {
     HashedValue = hashedPassword;
   }
 
-  public string HashedValue { get; }
+  public string? HashedValue { get; }
 
-  public static Password Create(string plainPassword)
+  public static Password CreateWithNoProvider(string plainPassword)
   {
     string regexPattern = @"^(?!.*\s)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
 
@@ -34,6 +34,9 @@ public sealed class Password : BuildingBlocks.Abstractions.ValueObject
 
     return new Password(Hash(plainPassword));
   }
+
+  public static Password CreateWithProvider(string? plainPassword) =>
+    new(plainPassword);
 
   public bool Verify(string plainPassword) =>
     BCrypt.Net.BCrypt.Verify(plainPassword, HashedValue);
