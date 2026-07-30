@@ -171,6 +171,7 @@ public static class DependencyInjection
   public static IServiceCollection AddRepositories(this IServiceCollection services)
   {
     services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IRoleRepository, RoleRepository>();
     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     return services;
