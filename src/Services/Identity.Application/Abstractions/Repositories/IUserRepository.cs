@@ -16,4 +16,6 @@ public interface IUserRepository : IRepository<User, Guid>
 
   Task<User?> FindByEmail(string email);
   Task<RefreshToken> AddRefreshToken(RefreshToken token, CancellationToken ct);
+  Task<RefreshToken?> RetrieveLastOldRefreshToken(string refreshTokenHashedValue);
+  void UpdateRefreshToken(RefreshToken refreshToken);
 }

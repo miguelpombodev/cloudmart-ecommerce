@@ -15,6 +15,12 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
     _context = ctx;
   }
 
+  public override async Task<User?> FindByIdAsync(Guid id, CancellationToken ct = default)
+  {
+    return await _context.Users.Include(user => user.Role).AsNoTracking()
+      .SingleOrDefaultAsync(user => user.Id == id, ct);
+  }
+
   public async Task<UserAuthenticationProvider> AddUserAuthenticationProviderAsync(
     UserAuthenticationProvider userAuthenticationProvider,
     CancellationToken ct)
@@ -49,4 +55,10 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
 
     return resultStmt.Entity;
   }
+
+  public async Task<RefreshToken?> RetrieveLastOldRefreshToken(string refreshTokenHashedValue) =>
+    await _context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(rt => rt.Token == refreshTokenHashedValue);
+
+  public void UpdateRefreshToken(RefreshToken refreshToken) =>
+    _context.RefreshTokens.Update(refreshToken);
 }

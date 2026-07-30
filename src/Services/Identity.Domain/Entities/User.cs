@@ -3,7 +3,7 @@ using Identity.Domain.ValueObject;
 
 namespace Identity.Domain.Entities;
 
-public class User : Aggregate<Guid>
+public sealed class User : Aggregate<Guid>
 {
   private readonly List<RefreshToken> _refreshTokens = [];
 
@@ -24,8 +24,8 @@ public class User : Aggregate<Guid>
     Password = password;
     Role = role;
     IsActive = true;
-    CreatedAt = DateTime.UtcNow;
-    UpdatedAt = DateTime.UtcNow;
+    CreatedAt = DateTimeOffset.UtcNow;
+    UpdatedAt = DateTimeOffset.UtcNow;
   }
 
   public CompleteName Name { get; private set; }
