@@ -16,17 +16,21 @@ public class RegisterUserHandlerTests
 
   private readonly Mock<IUserRepository> _repositoryMock;
 
+  private readonly Mock<IRoleRepository> _roleRepositoryMock;
+
   private readonly Mock<IUnitOfWork> _uowMock;
 
   public RegisterUserHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
+    _roleRepositoryMock = new Mock<IRoleRepository>();
     _uowMock = new Mock<IUnitOfWork>();
 
     var logger = new Mock<ILogger<RegisterUserHandler>>();
 
     _handler = new RegisterUserHandler(
       _repositoryMock.Object,
+      _roleRepositoryMock.Object,
       _uowMock.Object,
       logger.Object);
   }
