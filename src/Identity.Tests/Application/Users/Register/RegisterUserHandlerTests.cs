@@ -1,7 +1,7 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.Infrastructure;
 using FluentAssertions;
-using Identity.Application.Abstractions;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Application.Features.Users.Register;
 using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;

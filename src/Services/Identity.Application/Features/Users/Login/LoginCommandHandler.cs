@@ -1,8 +1,8 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
-using Identity.Application.Abstractions;
 using Identity.Application.Abstractions.Auth;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.Extensions.Logging;
 

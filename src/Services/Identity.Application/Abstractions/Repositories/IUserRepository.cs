@@ -1,7 +1,7 @@
 using BuildingBlocks.Abstractions;
 using Identity.Domain.Entities;
 
-namespace Identity.Application.Abstractions;
+namespace Identity.Application.Abstractions.Repositories;
 
 public interface IUserRepository : IRepository<User, Guid>
 {
@@ -15,6 +15,5 @@ public interface IUserRepository : IRepository<User, Guid>
     CancellationToken ct);
 
   Task<User?> FindByEmail(string email);
-  Task<Role> FindRoleByName(string roleName, CancellationToken ct);
   Task<RefreshToken> AddRefreshToken(RefreshToken token, CancellationToken ct);
 }

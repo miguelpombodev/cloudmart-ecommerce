@@ -1,5 +1,5 @@
 using BuildingBlocks.Infrastructure;
-using Identity.Application.Abstractions;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -42,9 +42,6 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
 
   public async Task<User?> FindByEmail(string email) =>
     await _context.Users.Include(u => u.Role).AsNoTracking().FirstOrDefaultAsync(user => user.Email.Address == email);
-
-  public async Task<Role> FindRoleByName(string roleName, CancellationToken ct) =>
-    await _context.Roles.SingleAsync(role => role.Name.Equals(roleName), ct)!;
 
   public async Task<RefreshToken> AddRefreshToken(RefreshToken token, CancellationToken ct)
   {

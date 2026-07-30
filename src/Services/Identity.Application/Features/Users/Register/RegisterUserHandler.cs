@@ -1,7 +1,7 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
-using Identity.Application.Abstractions;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
 using Identity.Domain.ValueObject;
 using Mapster;
@@ -15,11 +15,18 @@ public sealed class RegisterUserHandler : ICommandHandler<RegisterUserCommand, R
 
   private readonly IUserRepository _repository;
 
+  private readonly IRoleRepository _roleRepository;
+
   private readonly IUnitOfWork _uow;
 
-  public RegisterUserHandler(IUserRepository repository, IUnitOfWork uow, ILogger<RegisterUserHandler> logger)
+  public RegisterUserHandler(
+    IUserRepository repository,
+    IRoleRepository roleRepository,
+    IUnitOfWork uow,
+    ILogger<RegisterUserHandler> logger)
   {
     _repository = repository;
+    _roleRepository = roleRepository;
     _uow = uow;
     _logger = logger;
   }
@@ -43,7 +50,7 @@ public sealed class RegisterUserHandler : ICommandHandler<RegisterUserCommand, R
     var passwordResult = Password.CreateWithNoProvider(request.Password);
     var emailResult = Email.Create(request.Email);
 
-    Role role = await _repository.FindRoleByName("Customer", cancellationToken);
+    Role role = await _roleRepository.FindRoleByName("Customer", cancellationToken);
 
     Result<User> userResult = User.Create(
       completeNameResult,

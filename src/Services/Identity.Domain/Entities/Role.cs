@@ -4,7 +4,7 @@ using Identity.Domain.Enums;
 
 namespace Identity.Domain.Entities;
 
-public class Role : Entity<Guid>
+public sealed class Role : Aggregate<Guid>
 {
   private Role()
   {
@@ -19,7 +19,7 @@ public class Role : Entity<Guid>
     Type = roleType;
   }
 
-  public string Name { get; set; }
+  public string Name { get; private set; }
 
   public string Description { get; private set; }
 
