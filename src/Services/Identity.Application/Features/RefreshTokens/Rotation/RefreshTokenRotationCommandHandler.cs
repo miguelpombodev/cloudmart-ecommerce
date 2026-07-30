@@ -75,7 +75,7 @@ public sealed class
     _repository.UpdateRefreshToken(getMostOldUserRefreshToken);
     await _uow.SaveChangesAsync(cancellationToken);
 
-    _logger.LogInformation("User {UserEmail} logged successfully", user.RetrieveMaskedEmail());
+    _logger.LogInformation("Refresh token rotated successfully");
 
     return Result<RefreshTokenRotationResponse>.Success(
       new RefreshTokenRotationResponse(
