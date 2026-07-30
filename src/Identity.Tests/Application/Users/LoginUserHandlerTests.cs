@@ -1,8 +1,8 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.Infrastructure;
 using FluentAssertions;
-using Identity.Application.Abstractions;
 using Identity.Application.Abstractions.Auth;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Application.Features.Users.Login;
 using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;
@@ -76,101 +76,101 @@ public class LoginUserHandlerTests
     _repositoryMock.Verify(x => x.AddRefreshToken(It.IsAny<RefreshToken>(), CancellationToken.None), Times.Once);
   }
 
-   [Fact]
-    public async Task Handle_WhenUserDoesNotExist_ShouldReturnUnauthorized()
-    {
-        // Arrange
-        var command = new LoginCommand(
-            "john@test.com",
-            "Password@123!",
-            "127.0.0.1");
+  [Fact]
+  public async Task Handle_WhenUserDoesNotExist_ShouldReturnUnauthorized()
+  {
+    // Arrange
+    var command = new LoginCommand(
+      "john@test.com",
+      "Password@123!",
+      "127.0.0.1");
 
-        _repositoryMock
-            .Setup(x => x.FindByEmail(command.Email))
-            .ReturnsAsync((User?)null);
+    _repositoryMock
+      .Setup(x => x.FindByEmail(command.Email))
+      .ReturnsAsync((User?)null);
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+    // Act
+    Result<LoginResponse> result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
-        result.IsFailure.Should().BeTrue();
+    // Assert
+    result.IsFailure.Should().BeTrue();
 
-        _repositoryMock.Verify(x =>
-            x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+    _repositoryMock.Verify(x =>
+        x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
+      Times.Never);
 
-        _uowMock.Verify(x =>
-            x.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
+    _uowMock.Verify(x =>
+        x.SaveChangesAsync(It.IsAny<CancellationToken>()),
+      Times.Never);
+  }
 
-    [Fact]
-    public async Task Handle_WhenPasswordIsInvalid_ShouldReturnUnauthorized()
-    {
-        // Arrange
-        var role = Role.Create("Admin");
+  [Fact]
+  public async Task Handle_WhenPasswordIsInvalid_ShouldReturnUnauthorized()
+  {
+    // Arrange
+    var role = Role.Create("Admin");
 
-        var user = new UserBuilder()
-            .WithEmail("john@test.com")
-            .WithPassword("Password@123!")
-            .WithRole(role)
-            .Build();
+    User user = new UserBuilder()
+      .WithEmail("john@test.com")
+      .WithPassword("Password@123!")
+      .WithRole(role)
+      .Build();
 
-        var command = new LoginCommand(
-            user.Email.Address,
-            "WrongPassword",
-            "127.0.0.1");
+    var command = new LoginCommand(
+      user.Email.Address,
+      "WrongPassword",
+      "127.0.0.1");
 
-        _repositoryMock
-            .Setup(x => x.FindByEmail(command.Email))
-            .ReturnsAsync(user);
+    _repositoryMock
+      .Setup(x => x.FindByEmail(command.Email))
+      .ReturnsAsync(user);
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+    // Act
+    Result<LoginResponse> result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
-        result.IsFailure.Should().BeTrue();
+    // Assert
+    result.IsFailure.Should().BeTrue();
 
-        _repositoryMock.Verify(x =>
-            x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
+    _repositoryMock.Verify(x =>
+        x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
+      Times.Never);
+  }
 
-    [Fact]
-    public async Task Handle_WhenUserIsInactive_ShouldReturnUnauthorized()
-    {
-        // Arrange
-        var role = Role.Create("Admin");
+  [Fact]
+  public async Task Handle_WhenUserIsInactive_ShouldReturnUnauthorized()
+  {
+    // Arrange
+    var role = Role.Create("Admin");
 
-        var user = new UserBuilder()
-            .WithEmail("john@test.com")
-            .WithPassword("Password@123!")
-            .WithRole(role)
-            .Build();
+    User user = new UserBuilder()
+      .WithEmail("john@test.com")
+      .WithPassword("Password@123!")
+      .WithRole(role)
+      .Build();
 
-        user.Revoke();
+    user.Revoke();
 
-        var command = new LoginCommand(
-            user.Email.Address,
-            "Password@123!",
-            "127.0.0.1");
+    var command = new LoginCommand(
+      user.Email.Address,
+      "Password@123!",
+      "127.0.0.1");
 
-        _repositoryMock
-            .Setup(x => x.FindByEmail(command.Email))
-            .ReturnsAsync(user);
+    _repositoryMock
+      .Setup(x => x.FindByEmail(command.Email))
+      .ReturnsAsync(user);
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+    // Act
+    Result<LoginResponse> result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
-        result.IsFailure.Should().BeTrue();
+    // Assert
+    result.IsFailure.Should().BeTrue();
 
-        _repositoryMock.Verify(x =>
-            x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+    _repositoryMock.Verify(x =>
+        x.AddRefreshToken(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()),
+      Times.Never);
 
-        _uowMock.Verify(x =>
-            x.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
+    _uowMock.Verify(x =>
+        x.SaveChangesAsync(It.IsAny<CancellationToken>()),
+      Times.Never);
+  }
 }

@@ -1,8 +1,8 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
-using Identity.Application.Abstractions;
 using Identity.Application.Abstractions.Auth;
+using Identity.Application.Abstractions.Repositories;
 using Identity.Application.Features.Users.Login;
 using Identity.Domain.Entities;
 using Identity.Domain.Enums;
@@ -19,18 +19,22 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
 
   private readonly IUserRepository _repository;
 
+  private readonly IRoleRepository _roleRepository;
+
   private readonly ITokenService _tokenService;
 
   private readonly IUnitOfWork _uow;
 
   public GoogleLoginCommandHandler(
     IUserRepository repository,
+    IRoleRepository roleRepository,
     ITokenService tokenService,
     IExternalIdentityProvider googleProvider,
     ILogger<GoogleLoginCommandHandler> logger,
     IUnitOfWork uow)
   {
     _repository = repository;
+    _roleRepository = roleRepository;
     _tokenService = tokenService;
     _googleProvider = googleProvider;
     _logger = logger;
@@ -111,7 +115,7 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
 
   private async Task<User> CreateUserAuthenticated(ExternalUserInfo externalUser, CancellationToken ct)
   {
-    Role customerRole = await _repository.FindRoleByName(nameof(RoleType.Customer), ct);
+    Role customerRole = await _roleRepository.FindRoleByName(nameof(RoleType.Customer), ct);
 
     var completeName = CompleteName.Create(
       externalUser.FirstName ?? externalUser.Email.Split('@')[0],
