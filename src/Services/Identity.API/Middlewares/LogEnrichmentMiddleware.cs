@@ -8,7 +8,7 @@ namespace Cloudmart.Identity.Middlewares;
 /// </summary>
 public sealed class LogEnrichmentMiddleware
 {
-  private readonly RequestDelegate next;
+  private readonly RequestDelegate _next;
 
   /// <summary>
   ///   Initializes a new instance of the <see cref="LogEnrichmentMiddleware" /> class.
@@ -17,7 +17,7 @@ public sealed class LogEnrichmentMiddleware
   /// <param name="next">asasasaasasa.</param>
   public LogEnrichmentMiddleware(RequestDelegate next)
   {
-    this.next = next;
+    _next = next;
   }
 
   /// <summary>
@@ -28,11 +28,23 @@ public sealed class LogEnrichmentMiddleware
   /// <returns>asaas.</returns>
   public async Task InvokeAsync(HttpContext context, ICurrentUser currentUser)
   {
-    using (LogContext.PushProperty("UserId", currentUser.UserId))
     using (LogContext.PushProperty("RequestPath", context.Request.Path))
     using (LogContext.PushProperty("HttpMethod", context.Request.Method))
+    using (LogContext.PushProperty("ClientIp", context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown"))
     {
-      await next(context);
+      // UserId só existe em endpoints autenticados
+      // Guid.Empty significa requisição anônima (login, register, refresh)
+      if (currentUser.UserId != Guid.Empty)
+      {
+        using (LogContext.PushProperty("UserId", currentUser.UserId))
+        {
+          await _next(context);
+
+          return;
+        }
+      }
+
+      await _next(context);
     }
   }
 }

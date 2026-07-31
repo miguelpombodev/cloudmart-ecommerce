@@ -10,10 +10,10 @@ datasources:
     access: proxy
     isDefault: true
     jsonData:
-    httpMethod: POST
-    exemplarTraceIdDestinations:
-      - name: traceID
-    datasourceUid: tempo     # correlação métrica → trace
+      httpMethod: POST
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: tempo     # correlação métrica → trace
 
   # ─── LOGS ───────────────────────────────────────────────────────────────────
   - name: Loki
@@ -22,13 +22,13 @@ datasources:
     url: http://loki:3100
     access: proxy
     jsonData:
-    derivedFields:
-      # Extrai traceId dos logs e cria link para o Tempo
-      - matcherRegex: '"TraceId":"(\w+)"'
-        name: TraceID
-        url: '$${__value.raw}'
-    datasourceUid: tempo
-    urlDisplayLabel: 'Ver trace no Tempo'
+      derivedFields:
+        # Extrai traceId dos logs e cria link para o Tempo
+        - matcherRegex: '"TraceId":"(\w+)"'
+          name: TraceID
+          url: '$${__value.raw}'
+          datasourceUid: tempo
+          urlDisplayLabel: 'Ver trace no Tempo'
 
   # ─── TRACES ─────────────────────────────────────────────────────────────────
   - name: Tempo
@@ -37,14 +37,14 @@ datasources:
     url: http://tempo:3200
     access: proxy
     jsonData:
-    httpMethod: GET
-    serviceMap:
-      datasourceUid: prometheus   # service map usa métricas do Prometheus
-    nodeGraph:
-    enabled: true
-    lokiSearch:
-      datasourceUid: loki         # correlação trace → logs
-    traceQuery:
-    timeShiftEnabled: true
-    spanStartTimeShift: '-5m'
-    spanEndTimeShift: '5m'
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: prometheus   # service map usa métricas do Prometheus
+      nodeGraph:
+        enabled: true
+      lokiSearch:
+        datasourceUid: loki         # correlação trace → logs
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: '-5m'
+        spanEndTimeShift: '5m'
