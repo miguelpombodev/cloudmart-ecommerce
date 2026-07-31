@@ -34,6 +34,7 @@ internal static class DependencyInjection
     }
 
     app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+    app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<LogEnrichmentMiddleware>();
     app.UseAuthentication();
     app.UseAuthorization();
