@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using BuildingBlocks.Infrastructure;
@@ -20,6 +21,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -136,6 +139,9 @@ public static class DependencyInjection
 
     logging.AddOpenTelemetry(options =>
     {
+      options.IncludeScopes = true;
+      options.IncludeFormattedMessage = true;
+
       options.SetResourceBuilder(
           ResourceBuilder.CreateDefault()
             .AddService(serviceName))
@@ -152,18 +158,47 @@ public static class DependencyInjection
     string serviceName =
       configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
 
-    string tempoUrl = configuration["GrafanaTempoUrl"] ??
-                      throw new InvalidOperationException("Grafana Tempo URL not informed");
+    string otelExporterUrl = configuration["OtlpEndpoint"] ??
+                      throw new InvalidOperationException("OTEL Exporter URL not informed");
+
+    services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(otelExporterUrl); });
 
     services.AddOpenTelemetry()
-      .ConfigureResource(resource => resource.AddService(serviceName))
-      .WithTracing(tracing => tracing
-        .AddNpgsql()
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(opts => opts.Endpoint = new Uri(tempoUrl)))
-      .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(opts => opts.Endpoint = new Uri(tempoUrl)));
+      .ConfigureResource(resource => resource
+        .AddService(
+          serviceName: serviceName,
+          serviceVersion: Assembly.GetExecutingAssembly().GetName().Version?.ToString())
+        .AddAttributes( new[]
+        {
+          new KeyValuePair<string, object>("deployment.environment", "Development"),
+          new KeyValuePair<string, object>("team", "Platform"),
+          new KeyValuePair<string, object>("system", "CloudMart"),
+        }))
+      .WithTracing(traces =>
+      {
+        traces.AddAspNetCoreInstrumentation()
+          .AddHttpClientInstrumentation()
+          .AddEntityFrameworkCoreInstrumentation()
+          .AddMassTransitInstrumentation()
+          .AddSource("CloudMart.*")
+          .AddNpgsql()
+          .AddOtlpExporter(options =>
+          {
+            options.Endpoint = new Uri(otelExporterUrl);
+          });
+      })
+      .WithMetrics(metrics =>
+      {
+        metrics
+          .AddAspNetCoreInstrumentation()
+          .AddHttpClientInstrumentation()
+          .AddRuntimeInstrumentation()
+          .AddProcessInstrumentation()
+          .AddOtlpExporter(options =>
+          {
+            options.Endpoint = new Uri(otelExporterUrl);
+          });
+      });
 
     return services;
   }
