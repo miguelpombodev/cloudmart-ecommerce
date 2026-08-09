@@ -11,10 +11,10 @@ builder.Logging.AddLoggingBuilder(configuration);
 builder.Host.AddHostBuilder();
 
 builder.Services
+  .AddProviderOptions(configuration)
   .AddInfrastructureServices(configuration)
   .AddTelemetryServices(configuration)
   .AddRepositories()
-  .AddProviderOptions(configuration)
   .AddProviders(configuration)
   .AddApplicationServices()
   .AddApiServices();

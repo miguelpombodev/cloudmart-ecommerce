@@ -7,6 +7,7 @@ using Cloudmart.Identity.Configurations;
 using Identity.Application.Abstractions.Auth;
 using Identity.Application.Abstractions.Options;
 using Identity.Application.Abstractions.Repositories;
+using Identity.Domain.Enums;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Providers;
@@ -37,6 +38,8 @@ namespace Identity.Infrastructure;
 public static class DependencyInjection
 {
   private const string ExternalProvidersSectionName = "Authentication";
+
+  private const string OtelSectionName = "OpenTelemetry";
 
   public static IServiceCollection AddInfrastructureServices(
     this IServiceCollection services,
@@ -155,37 +158,31 @@ public static class DependencyInjection
     this IServiceCollection services,
     IConfiguration configuration)
   {
-    string serviceName =
-      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
+    OpenTelemetryOptions openTelemetryOptions = ReadOptions<OpenTelemetryOptions>(configuration, OtelSectionName);
 
-    string otelExporterUrl = configuration["OtlpEndpoint"] ??
-                      throw new InvalidOperationException("OTEL Exporter URL not informed");
-
-    services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(otelExporterUrl); });
+    services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
 
     services.AddOpenTelemetry()
       .ConfigureResource(resource => resource
         .AddService(
-          serviceName: serviceName,
+          serviceName: openTelemetryOptions.ServiceName,
           serviceVersion: Assembly.GetExecutingAssembly().GetName().Version?.ToString())
-        .AddAttributes( new[]
-        {
-          new KeyValuePair<string, object>("deployment.environment", "Development"),
-          new KeyValuePair<string, object>("team", "Platform"),
-          new KeyValuePair<string, object>("system", "CloudMart"),
-        }))
+        .AddAttributes(
+          openTelemetryOptions.OtelAttributes.Select(option => new KeyValuePair<string, object>(
+            option.Key,
+            option.Value)
+          )
+        )
+      )
       .WithTracing(traces =>
       {
         traces.AddAspNetCoreInstrumentation()
           .AddHttpClientInstrumentation()
           .AddEntityFrameworkCoreInstrumentation()
           .AddMassTransitInstrumentation()
-          .AddSource("CloudMart.*")
+          .AddSource($"{openTelemetryOptions.ApplicationName}.*")
           .AddNpgsql()
-          .AddOtlpExporter(options =>
-          {
-            options.Endpoint = new Uri(otelExporterUrl);
-          });
+          .AddOtlpExporter(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
       })
       .WithMetrics(metrics =>
       {
@@ -194,10 +191,7 @@ public static class DependencyInjection
           .AddHttpClientInstrumentation()
           .AddRuntimeInstrumentation()
           .AddProcessInstrumentation()
-          .AddOtlpExporter(options =>
-          {
-            options.Endpoint = new Uri(otelExporterUrl);
-          });
+          .AddOtlpExporter(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
       });
 
     return services;
@@ -214,11 +208,16 @@ public static class DependencyInjection
 
   public static IServiceCollection AddProviders(this IServiceCollection services, IConfiguration configuration)
   {
+    ExternalProvidersOptions providersOptions =
+      ReadOptions<ExternalProvidersOptions>(configuration, ExternalProvidersSectionName);
+
     services.AddScoped<ITokenService, TokenService>();
 
     services.AddHttpClient<IExternalIdentityProvider, GoogleAuthService>(client =>
-      client.BaseAddress = new Uri("https://oauth2.googleapis.com/")
-    );
+    {
+      client.BaseAddress = new Uri(providersOptions.Google.Url);
+      client.Timeout = providersOptions.Google.ResponseTimeout;
+    });
 
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
       .AddJwtBearer(options =>
@@ -282,12 +281,12 @@ public static class DependencyInjection
     {
       options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-      options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("Admin"));
+      options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole(nameof(RoleType.Admin)));
       options.AddPolicy(Policies.CatalogManagement, policy => policy.RequireRole("Admin", "Manager", "Seller"));
 
       options.AddPolicy(
         Policies.VerifiedSeller,
-        policy => policy.RequireRole("Seller").RequireClaim("email_verified", "true"));
+        policy => policy.RequireRole(nameof(RoleType.Seller)).RequireClaim("email_verified", "true"));
 
       if (!isDevelopment)
       {
@@ -304,7 +303,16 @@ public static class DependencyInjection
   {
     services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
     services.Configure<ExternalProvidersOptions>(configuration.GetSection(ExternalProvidersSectionName));
+    services.Configure<OpenTelemetryOptions>(configuration.GetSection(OtelSectionName));
 
     return services;
+  }
+
+  private static T ReadOptions<T>(IConfiguration configuration, string sectionName)
+  {
+    return configuration.GetSection(sectionName).Get<T>() ??
+           throw new InvalidOperationException(
+             $"Configuration section '{ExternalProvidersSectionName}' is missing. " +
+             $"Ensure appsettings contains the '{ExternalProvidersSectionName}' section.");
   }
 }
