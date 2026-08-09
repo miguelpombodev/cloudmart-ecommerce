@@ -1,6 +1,0 @@
-@Cloudmart.Identity_HostAddress = http://localhost:5288
-
-GET {{Cloudmart.Identity_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
