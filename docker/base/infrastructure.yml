@@ -1,4 +1,56 @@
 services:
+  email_sender:
+    image: wallghost/email-sender-subscriber:latest
+    container_name: email_sender_worker
+    environment:
+      Smtp__Host: ${SMTP_HOST}
+      Smtp__Port: ${SMTP_PORT}
+      Smtp__User: ${SMTP_USER}
+      Smtp__Password: ${SMTP_PASSWORD}
+      Smtp__FromEmail: ${SMTP_FROM_EMAIL}
+      Smtp__FromName: ${SMTP_FROM_NAME}
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__QueueName: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_QUEUE_NAME}
+      RabbitMq__VirtualHost: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_VIRTUAL_HOST}
+      RabbitMq__PrefetchCount: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_PREFECTH_COUNT}
+      RabbitMq__QueueMessageTtl: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_MESSAGE_TTL}
+      RabbitMq__DeadLetterExchangeName: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_DEAD_LETTER_EXCHANGE}
+    networks:
+      - cloudmart_net
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification-svc:
+    image: wallghost/notification-worker
+    restart: always
+    container_name: notification-svc
+    environment:
+      OpenTelemetry__Endpoint: http://otel-collector:4318
+      OpenTelemetry__Environment: Production
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__QueueName: ${RABBITMQ_NOTIFICATION_QUEUE_NAME}
+      RabbitMq__ExchangeName: ${RABBITMQ_NOTIFICATION_EXCHANGE_NAME}
+      RabbitMq__RoutingKeyName: ${RABBITMQ_NOTIFICATION_ROUTING_KEY_NAME}
+      RabbitMq__VirtualHost: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_VIRTUAL_HOST}
+      EmailSender__HostName: rabbitmq
+      EmailSender__QueueName: ${RABBITMQ_NOTIFICATION_EMAIL_SENDER_QUEUE_NAME}
+      EmailSender__QueuePort: ${RABBITMQ_PORT}
+      EmailSender__QueueUserName: ${RABBITMQ_USER}
+      EmailSender__QueuePassword: ${RABBITMQ_PASSWORD}
+    networks:
+      - cloudmart_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   redis:
     image: redis:7-alpine
     container_name: redis_service
@@ -6,6 +58,9 @@ services:
     restart: unless-stopped
     networks:
       - cloudmart_net
+    depends_on:
+      - catalog-db
+      - identity-db
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -14,10 +69,17 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ../volumes/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
-      - ../volumes/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
       - cloudmart_net
 
@@ -52,7 +114,7 @@ services:
     container_name: cloudmart_identity_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD}
     volumes:
       - identity_db_data:/var/lib/postgresql/data
       - ../volumes/postgres/inits/identity_db.sql:/docker-entrypoint-initdb.d/init.sql:ro

@@ -10,9 +10,9 @@ using Moq;
 
 namespace Identity.Tests.Application.Users.Register;
 
-public class RegisterUserHandlerTests
+public class RegisterUserCommandHandlerTests
 {
-  private readonly RegisterUserHandler _handler;
+  private readonly RegisterUserCommandHandler _commandHandler;
 
   private readonly Mock<IUserRepository> _repositoryMock;
 
@@ -20,15 +20,15 @@ public class RegisterUserHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
-  public RegisterUserHandlerTests()
+  public RegisterUserCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _roleRepositoryMock = new Mock<IRoleRepository>();
     _uowMock = new Mock<IUnitOfWork>();
 
-    var logger = new Mock<ILogger<RegisterUserHandler>>();
+    var logger = new Mock<ILogger<RegisterUserCommandHandler>>();
 
-    _handler = new RegisterUserHandler(
+    _commandHandler = new RegisterUserCommandHandler(
       _repositoryMock.Object,
       _roleRepositoryMock.Object,
       _uowMock.Object,
@@ -42,7 +42,7 @@ public class RegisterUserHandlerTests
 
     _repositoryMock.Setup(r => r.FindByEmail(command.Email)).ReturnsAsync((User?)null);
 
-    await _handler.Handle(command, CancellationToken.None);
+    await _commandHandler.Handle(command, CancellationToken.None);
 
     _repositoryMock.Verify(
       r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
@@ -56,7 +56,7 @@ public class RegisterUserHandlerTests
 
     _repositoryMock.Setup(r => r.FindByEmail(command.Email)).ReturnsAsync((User?)null);
 
-    await _handler.Handle(command, CancellationToken.None);
+    await _commandHandler.Handle(command, CancellationToken.None);
 
     _uowMock.Verify(
       r => r.SaveChangesAsync(It.IsAny<CancellationToken>()),
@@ -77,7 +77,7 @@ public class RegisterUserHandlerTests
       .ReturnsAsync(existingUser);
 
     // Act
-    Result<RegisterUserResponse> result = await _handler.Handle(command, CancellationToken.None);
+    Result<RegisterUserResponse> result = await _commandHandler.Handle(command, CancellationToken.None);
 
     // Assert
     result.IsFailure.Should().BeTrue();
@@ -99,7 +99,7 @@ public class RegisterUserHandlerTests
       .Setup(r => r.FindByEmail(command.Email))
       .ReturnsAsync(existingUser);
 
-    await _handler.Handle(command, CancellationToken.None);
+    await _commandHandler.Handle(command, CancellationToken.None);
 
     _repositoryMock.Verify(
       r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
@@ -119,7 +119,7 @@ public class RegisterUserHandlerTests
       .Setup(r => r.FindByEmail(It.IsAny<string>()))
       .ReturnsAsync((User?)null);
 
-    await _handler.Handle(command, CancellationToken.None);
+    await _commandHandler.Handle(command, CancellationToken.None);
 
     _repositoryMock.Verify(
       r => r.FindByEmail("joao@example.com"),

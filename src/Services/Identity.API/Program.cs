@@ -13,6 +13,7 @@ builder.Host.AddHostBuilder();
 builder.Services
   .AddProviderOptions(configuration)
   .AddInfrastructureServices(configuration)
+  .AddMassTransitConfiguration(configuration)
   .AddTelemetryServices(configuration)
   .AddRepositories()
   .AddProviders(configuration)
