@@ -1,4 +1,19 @@
 {
+  "users": [
+    {
+      "name": "admin",
+      "password_hash": "Ym8i5VWFhn/Me7rqb/YVdP/3McMUSFfai1FAQlkMR2jKSA1P",
+      "tags": ["administrator"]
+    }
+  ],
+  "permissions":[
+    {
+      "user":"admin",
+      "vhost":"/",
+      "configure":".*",
+      "read":".*",
+      "write":".*"}
+  ],
 	"vhosts": [
 		{
 			"name": "/"

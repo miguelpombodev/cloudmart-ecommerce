@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Carter"/>
+    <PackageReference Include="cloudmart.contracts" />
     <PackageReference Include="Mapster"/>
     <PackageReference Include="MediatR"/>
     <PackageReference Include="Serilog.Sinks.Grafana.Loki"/>

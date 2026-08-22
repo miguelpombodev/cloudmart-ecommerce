@@ -1,9 +1,11 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using BuildingBlocks.Infrastructure;
 using BuildingBlocks.Logging;
 using Cloudmart.Identity.Configurations;
+using Identity.Application;
 using Identity.Application.Abstractions.Auth;
 using Identity.Application.Abstractions.Options;
 using Identity.Application.Abstractions.Repositories;
@@ -12,6 +14,7 @@ using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Providers;
 using Identity.Infrastructure.Providers.Identity;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -120,7 +123,7 @@ public static class DependencyInjection
     IConfiguration configuration)
   {
     string serviceName =
-      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
+      configuration["OpenTelemetry:ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
 
     Log.Logger = new LoggerConfiguration()
       .Enrich
@@ -202,6 +205,34 @@ public static class DependencyInjection
     services.AddScoped<IUserRepository, UserRepository>();
     services.AddScoped<IRoleRepository, RoleRepository>();
     services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+    return services;
+  }
+
+  public static IServiceCollection AddMassTransitConfiguration(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddMassTransit(busConfigurator =>
+    {
+      busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+      busConfigurator.UsingRabbitMq((context, config) =>
+      {
+        config.ConfigureJsonSerializerOptions(options =>
+        {
+          options.Converters.Add(new JsonStringEnumConverter());
+
+          return options;
+        });
+
+        config.Host(new Uri(configuration["MessageBroker:Host"]!), h =>
+        {
+          h.Username(configuration["MessageBroker:Username"]!);
+          h.Password(configuration["MessageBroker:Password"]!);
+        });
+
+        config.ConfigureEndpoints(context);
+      });
+    });
 
     return services;
   }

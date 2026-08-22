@@ -12,6 +12,8 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="Magick.NET.Core" Version="14.14.0" />
     <PackageVersion Include="Mapster" Version="10.0.8-pre06" />
+    <PackageVersion Include="MassTransit" Version="9.2.1-develop.163" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="9.2.1-develop.163" />
     <PackageVersion Include="MediatR" Version="14.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.17" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.17" />
@@ -44,6 +46,7 @@
     <PackageVersion Include="Serilog" Version="4.3.2-dev-02433" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="cloudmart.contracts" Version="1.0.2" />
     <PackageVersion Include="Serilog.Enrichers.OpenTelemetry" Version="1.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Process" Version="3.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Span" Version="3.1.0" />
