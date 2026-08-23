@@ -4,5 +4,3 @@ include:
 
   - path: ../observability/docker-compose.observability.yml
     env_file: ../.env.development
-
-  - path: ../overrides/infrastructure.development.yml
