@@ -44,13 +44,10 @@ public sealed class LoginEndpoint : ICarterModule
           response.AccessToken,
           new CookieOptions
           {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = response.ExpiresAt,
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = response.ExpiresAt,
           });
 
-        return Results.Ok();
+        return Results.Ok(new { response.RefreshToken });
       })
       .WithName("Login")
       .AllowAnonymous()
