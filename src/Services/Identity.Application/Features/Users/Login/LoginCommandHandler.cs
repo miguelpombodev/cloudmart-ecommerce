@@ -54,7 +54,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
       new LoginResponse(
         tokenResult.AccessToken,
         rawRefreshToken,
-        900,
+        DateTimeOffset.UtcNow.AddMinutes(2),
         tokenResult.TokenType));
   }
 }

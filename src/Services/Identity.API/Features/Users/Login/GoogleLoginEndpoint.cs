@@ -2,6 +2,7 @@ using BuildingBlocks.Abstractions;
 using Carter;
 using Identity.Application.Features.Users.Login;
 using Identity.Application.Features.Users.SocialLogin;
+using Mapster;
 using MediatR;
 
 namespace Cloudmart.Identity.Features.Users.Login;
@@ -36,7 +37,17 @@ public sealed class GoogleLoginEndpoint : ICarterModule
             title: result.Error.InternalCode);
         }
 
-        return Results.Ok(result.Value);
+        LoginResponse response = result.Value.Adapt<LoginResponse>();
+
+        httpContext.Response.Cookies.Append(
+          "access_token",
+          response.AccessToken,
+          new CookieOptions
+          {
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = response.ExpiresAt,
+          });
+
+        return Results.Ok();
       })
       .WithName("GoogleLogin")
       .AllowAnonymous()

@@ -1,3 +1,3 @@
 namespace Identity.Application.Features.Users.Login;
 
-public sealed record LoginResponse(string AccessToken, string RefreshToken, int ExpiresAt = 900, string TokenType = "Bearer");
+public sealed record LoginResponse(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt, string TokenType = "Bearer");
