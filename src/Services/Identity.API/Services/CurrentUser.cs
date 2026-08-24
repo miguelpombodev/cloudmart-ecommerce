@@ -28,6 +28,8 @@ public sealed class CurrentUser : ICurrentUser
       ? userId
       : Guid.Empty;
 
+  public bool IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+
   /// <inheritdoc />
   public string Email =>
     httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
