@@ -4,8 +4,11 @@ on:
   push:
     branches: [ main, develop ]
 
-jobs:
+permissions:
+  contents: read
+  packages: read
 
+jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
