@@ -41,9 +41,13 @@ public class CompleteName : BuildingBlocks.Abstractions.ValueObject
     return new CompleteName(firstName, lastName);
   }
 
+  public override string ToString() =>
+   $"{FirstName} {LastName}";
+
   protected override IEnumerable<object?> RetrieveEqualityComponents()
   {
     yield return FirstName.ToLower();
     yield return LastName.ToLower();
   }
+
 }
