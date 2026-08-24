@@ -18,6 +18,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -118,43 +119,41 @@ public static class DependencyInjection
     return host;
   }
 
-  public static ILoggingBuilder AddLoggingBuilder(
-    this ILoggingBuilder logging,
-    IConfiguration configuration)
+  public static IServiceCollection AddLoggingServices(
+    this IServiceCollection services,
+    IConfiguration configuration,
+    IWebHostEnvironment environment)
   {
-    string serviceName =
-      configuration["OpenTelemetry:ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
-
-    Log.Logger = new LoggerConfiguration()
-      .Enrich
-      .WithProperty("service", serviceName)
-      .Enrich
-      .WithEnvironmentName()
-      .Enrich
-      .WithMachineName()
-      .Enrich
-      .WithThreadId()
-      .Enrich
-      .WithOpenTelemetryTraceId()
-      .Enrich
-      .WithOpenTelemetrySpanId()
-      .WriteTo
-      .Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] [{MachineName}] {Message:lj}{NewLine}{Exception}")
-      .CreateLogger();
-
-    logging.AddOpenTelemetry(options =>
+    services.AddSerilog((svcs, loggerConfiguration) =>
     {
-      options.IncludeScopes = true;
-      options.IncludeFormattedMessage = true;
-
-      options.SetResourceBuilder(
-          ResourceBuilder.CreateDefault()
-            .AddService(serviceName))
-        .AddConsoleExporter();
+      loggerConfiguration
+        .ReadFrom
+        .Configuration(configuration)
+        .ReadFrom
+        .Services(svcs)
+        .Enrich
+        .WithProperty(
+          "service.name",
+          environment.ApplicationName)
+        .Enrich
+        .WithProperty(
+          "deployment.environment",
+          environment.EnvironmentName)
+        .Enrich
+        .WithEnvironmentName()
+        .Enrich
+        .WithMachineName()
+        .Enrich
+        .WithThreadId()
+        .Enrich
+        .WithOpenTelemetryTraceId()
+        .Enrich
+        .WithOpenTelemetrySpanId()
+        .WriteTo
+        .Console(outputTemplate:
+          "[{Timestamp:HH:mm:ss} {Level:u3}] [{MachineName}] {Message:lj}{NewLine}{Exception}");
     });
-
-    return logging;
+    return services;
   }
 
   public static IServiceCollection AddTelemetryServices(
@@ -163,20 +162,22 @@ public static class DependencyInjection
   {
     OpenTelemetryOptions openTelemetryOptions = ReadOptions<OpenTelemetryOptions>(configuration, OtelSectionName);
 
-    services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
+    string otelExporterUrl = configuration["OtlpEndpoint"] ??
+                             throw new InvalidOperationException("OTEL Exporter URL not informed");
+
+    services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(otelExporterUrl); });
 
     services.AddOpenTelemetry()
       .ConfigureResource(resource => resource
         .AddService(
           serviceName: openTelemetryOptions.ServiceName,
           serviceVersion: Assembly.GetExecutingAssembly().GetName().Version?.ToString())
-        .AddAttributes(
-          openTelemetryOptions.OtelAttributes.Select(option => new KeyValuePair<string, object>(
-            option.Key,
-            option.Value)
-          )
-        )
-      )
+        .AddAttributes(new[]
+        {
+          new KeyValuePair<string, object>("deployment.environment", "Development"),
+          new KeyValuePair<string, object>("team", "Platform"),
+          new KeyValuePair<string, object>("system", "CloudMart"),
+        }))
       .WithTracing(traces =>
       {
         traces.AddAspNetCoreInstrumentation()
@@ -185,7 +186,7 @@ public static class DependencyInjection
           .AddMassTransitInstrumentation()
           .AddSource($"{openTelemetryOptions.ApplicationName}.*")
           .AddNpgsql()
-          .AddOtlpExporter(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
+          .AddOtlpExporter(options => { options.Endpoint = new Uri(otelExporterUrl); });
       })
       .WithMetrics(metrics =>
       {
@@ -194,7 +195,7 @@ public static class DependencyInjection
           .AddHttpClientInstrumentation()
           .AddRuntimeInstrumentation()
           .AddProcessInstrumentation()
-          .AddOtlpExporter(options => { options.Endpoint = new Uri(openTelemetryOptions.OtelUrl); });
+          .AddOtlpExporter(options => { options.Endpoint = new Uri(otelExporterUrl); });
       });
 
     return services;
