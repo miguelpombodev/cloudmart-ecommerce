@@ -6,8 +6,6 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
 
-builder.Logging.AddLoggingBuilder(configuration);
-
 builder.Host.AddHostBuilder();
 
 builder.Services
@@ -17,6 +15,7 @@ builder.Services
   .AddTelemetryServices(configuration)
   .AddRepositories()
   .AddProviders(configuration)
+  .AddLoggingServices(configuration, builder.Environment)
   .AddApplicationServices()
   .AddApiServices();
 
