@@ -5,6 +5,7 @@ using Identity.Application.Abstractions.Repositories;
 using Identity.Application.Features.Users.Register;
 using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -19,12 +20,14 @@ public class RegisterUserCommandHandlerTests
   private readonly Mock<IRoleRepository> _roleRepositoryMock;
 
   private readonly Mock<IUnitOfWork> _uowMock;
+  private readonly Mock<IPublishEndpoint> _publishEndpointMock;
 
   public RegisterUserCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _roleRepositoryMock = new Mock<IRoleRepository>();
     _uowMock = new Mock<IUnitOfWork>();
+    _publishEndpointMock = new Mock<IPublishEndpoint>();
 
     var logger = new Mock<ILogger<RegisterUserCommandHandler>>();
 
@@ -32,6 +35,7 @@ public class RegisterUserCommandHandlerTests
       _repositoryMock.Object,
       _roleRepositoryMock.Object,
       _uowMock.Object,
+      _publishEndpointMock.Object,
       logger.Object);
   }
 
