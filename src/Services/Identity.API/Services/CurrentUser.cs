@@ -28,6 +28,7 @@ public sealed class CurrentUser : ICurrentUser
       ? userId
       : Guid.Empty;
 
+  /// <inheritdoc />
   public bool IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
 
   /// <inheritdoc />
