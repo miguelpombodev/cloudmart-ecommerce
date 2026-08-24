@@ -1,8 +1,10 @@
 using BuildingBlocks.Exceptions;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace Cloudmart.Identity.Middlewares;
+namespace BuildingBlocks.Middlewares;
 
 /// <inheritdoc />
 public sealed class GlobalExceptionHandlerMiddleware : IMiddleware
