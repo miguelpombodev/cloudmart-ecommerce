@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '0 8 * * 1'    # toda segunda às 8h — scan semanal completo
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
