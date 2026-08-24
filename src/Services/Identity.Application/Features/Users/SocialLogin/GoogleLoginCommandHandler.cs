@@ -109,7 +109,7 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
     return Result<LoginResponse>.Success(new LoginResponse(
       tokenResult.AccessToken,
       rawRefreshToken,
-      900,
+      DateTimeOffset.UtcNow.AddMinutes(2),
       tokenResult.TokenType));
   }
 

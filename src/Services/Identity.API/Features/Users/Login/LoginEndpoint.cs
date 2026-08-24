@@ -23,7 +23,7 @@ public sealed class LoginEndpoint : ICarterModule
         CancellationToken ct) =>
       {
         string clientIp = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
-                       httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                          httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
         LoginCommand command = request.Adapt<LoginCommand>() with { ClientIp = clientIp };
 
@@ -39,7 +39,18 @@ public sealed class LoginEndpoint : ICarterModule
 
         LoginResponse response = result.Value.Adapt<LoginResponse>();
 
-        return Results.Ok(response);
+        httpContext.Response.Cookies.Append(
+          "access_token",
+          response.AccessToken,
+          new CookieOptions
+          {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Expires = response.ExpiresAt,
+          });
+
+        return Results.Ok();
       })
       .WithName("Login")
       .AllowAnonymous()
