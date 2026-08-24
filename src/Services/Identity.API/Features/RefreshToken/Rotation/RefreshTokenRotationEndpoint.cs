@@ -15,11 +15,19 @@ public class RefreshTokenRotationEndpoint : ICarterModule
   {
     RouteGroupBuilder group = app.MapGroup("refresh-token");
 
-    group.MapPost("rotation", async (
+    group.MapPost("/user/token/rotation", async (
         RefreshTokenRotationRequest request,
         ISender sender,
+        HttpContext context,
         CancellationToken ct) =>
       {
+        string? accessToken = context.Request.Cookies["access_token"];
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+          return Results.Unauthorized();
+        }
+
         RefreshTokenRotationCommand command = request.Adapt<RefreshTokenRotationCommand>();
 
         Result<RefreshTokenRotationResponse> result = await sender.Send(command, ct);
@@ -33,6 +41,14 @@ public class RefreshTokenRotationEndpoint : ICarterModule
         }
 
         LoginResponse response = result.Value.Adapt<LoginResponse>();
+
+        context.Response.Cookies.Append(
+          "access_token",
+          response.AccessToken,
+          new CookieOptions
+          {
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = DateTimeOffset.UtcNow.AddMinutes(2),
+          });
 
         return Results.Ok(response);
       })

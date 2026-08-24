@@ -47,7 +47,7 @@ public sealed class GoogleLoginEndpoint : ICarterModule
             HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = response.ExpiresAt,
           });
 
-        return Results.Ok();
+        return Results.Ok(new { response.RefreshToken });
       })
       .WithName("GoogleLogin")
       .AllowAnonymous()
