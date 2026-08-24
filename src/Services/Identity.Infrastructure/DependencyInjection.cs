@@ -162,7 +162,7 @@ public static class DependencyInjection
   {
     OpenTelemetryOptions openTelemetryOptions = ReadOptions<OpenTelemetryOptions>(configuration, OtelSectionName);
 
-    string otelExporterUrl = configuration["OtlpEndpoint"] ??
+    string otelExporterUrl = configuration["OpenTelemetry:OtelUrl"] ??
                              throw new InvalidOperationException("OTEL Exporter URL not informed");
 
     services.Configure<OtlpExporterOptions>(options => { options.Endpoint = new Uri(otelExporterUrl); });
