@@ -1,7 +1,8 @@
 using BuildingBlocks.Abstractions;
+using Microsoft.AspNetCore.Http;
 using Serilog.Context;
 
-namespace Cloudmart.Identity.Middlewares;
+namespace BuildingBlocks.Middlewares;
 
 /// <summary>
 ///   asasasasasa.

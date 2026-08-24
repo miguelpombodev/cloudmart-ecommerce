@@ -1,6 +1,6 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Middlewares;
 using Carter;
-using Cloudmart.Identity.Middlewares;
 using Cloudmart.Identity.Services;
 using Scalar.AspNetCore;
 
