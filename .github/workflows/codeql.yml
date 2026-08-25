@@ -2,38 +2,57 @@ name: CodeQL Analysis
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - develop
+
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - develop
+
   schedule:
-    - cron: '0 8 * * 1'    # toda segunda às 8h — scan semanal completo
+    - cron: '0 8 * * 1'
 
 permissions:
   contents: read
   packages: read
 
 jobs:
+
   analyze:
     runs-on: ubuntu-latest
+
     permissions:
+      contents: read
+      packages: read
       security-events: write
 
     steps:
-      - uses: actions/checkout@v7
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4.37.3
         with:
           languages: csharp
-          queries: security-extended    # ruleset mais completo que o padrão
+          queries: security-extended
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet restore src
 
       - name: Build
-        run: dotnet build src --no-incremental
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet build src --no-restore --no-incremental
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4.37.3
