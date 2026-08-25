@@ -296,6 +296,50 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                     b.ToTable("user_oauth_providers", (string)null);
                 });
 
+            modelBuilder.Entity("Identity.Domain.Entities.UserAvatar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("avatar_url");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("avatars", "identity");
+                });
+
             modelBuilder.Entity("Identity.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Identity.Domain.Entities.User", null)
@@ -392,11 +436,22 @@ namespace Identity.Infrastructure.Persistence.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Identity.Domain.Entities.UserAvatar", b =>
+                {
+                    b.HasOne("Identity.Domain.Entities.User", null)
+                        .WithOne("UserAvatar")
+                        .HasForeignKey("Identity.Domain.Entities.UserAvatar", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Identity.Domain.Entities.User", b =>
                 {
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserAuthenticationProviders");
+
+                    b.Navigation("UserAvatar");
                 });
 #pragma warning restore 612, 618
         }

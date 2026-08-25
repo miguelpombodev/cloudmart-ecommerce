@@ -15,15 +15,17 @@ public sealed class User : Aggregate<Guid>
     Email = null!;
     Password = null!;
     Role = null!;
+    UserAvatar = null!;
   }
 
-  private User(CompleteName name, Email email, Password? password, Role role)
+  private User(CompleteName name, Email email, Password? password, Role role, UserAvatar? userAvatar = null)
   {
     Name = name;
     Email = email;
     Password = password;
     Role = role;
     IsActive = true;
+    UserAvatar = userAvatar;
     CreatedAt = DateTimeOffset.UtcNow;
     UpdatedAt = DateTimeOffset.UtcNow;
   }
@@ -43,13 +45,16 @@ public sealed class User : Aggregate<Guid>
 
   public bool IsActive { get; private set; }
 
+  public UserAvatar? UserAvatar { get; private set; }
+
   public static User Create(
     CompleteName name,
     Email email,
     Password password,
-    Role role)
+    Role role,
+    UserAvatar? userAvatar = null)
   {
-    var user = new User(name, email, password, role) { Id = Guid.NewGuid() };
+    var user = new User(name, email, password, role, userAvatar) { Id = Guid.NewGuid() };
 
     return user;
   }

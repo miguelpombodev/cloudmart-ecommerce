@@ -57,6 +57,13 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
 
     builder.HasOne(u => u.Role).WithMany().HasForeignKey("role_id").IsRequired();
 
+    builder.HasOne(u => u.UserAvatar)
+      .WithOne()
+      .HasForeignKey<UserAvatar>(x => x.UserId)
+      .HasPrincipalKey<User>(u => u.Id)
+      .OnDelete(DeleteBehavior.Cascade)
+      .IsRequired();
+
     builder.Metadata.FindNavigation(nameof(User.RefreshTokens))!.SetPropertyAccessMode(PropertyAccessMode.Field);
     builder.HasMany(u => u.RefreshTokens).WithOne().HasForeignKey(rt => rt.UserId).OnDelete(DeleteBehavior.Cascade);
 
