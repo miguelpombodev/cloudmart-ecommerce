@@ -18,4 +18,6 @@ public interface IUserRepository : IRepository<User, Guid>
   Task<RefreshToken> AddRefreshToken(RefreshToken token, CancellationToken ct);
   Task<RefreshToken?> RetrieveLastOldRefreshToken(string refreshTokenHashedValue);
   void UpdateRefreshToken(RefreshToken refreshToken);
+  Task AddUserAvatar(UserAvatar userAvatar, CancellationToken ct);
+  void UpdateUserAvatar(UserAvatar userAvatar, CancellationToken ct);
 }
