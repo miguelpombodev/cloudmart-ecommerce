@@ -12,10 +12,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
     <PackageReference Include="Scalar.AspNetCore"/>
     <PackageReference Include="Scrutor"/>
-    <PackageReference Include="StyleCop.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -29,13 +25,5 @@
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj"/>
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj"/>
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="stylecop.json">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </AdditionalFiles>
   </ItemGroup>
 </Project>
