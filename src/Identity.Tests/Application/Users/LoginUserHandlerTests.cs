@@ -71,7 +71,7 @@ public class LoginUserHandlerTests
     result.Value.AccessToken.Should().Be("jwt-token");
     result.Value.RefreshToken.Should().HaveLength(64);
     result.Value.TokenType.Should().Be("Bearer");
-    result.Value.ExpiresAt.Should().Be(900);
+    result.Value.ExpiresAt.Should().Be(DateTimeOffset.UtcNow.AddMinutes(2));
 
     _repositoryMock.Verify(x => x.AddRefreshToken(It.IsAny<RefreshToken>(), CancellationToken.None), Times.Once);
   }
