@@ -8,12 +8,14 @@ using Cloudmart.Identity.Configurations;
 using Identity.Application;
 using Identity.Application.Abstractions.Auth;
 using Identity.Application.Abstractions.Options;
+using Identity.Application.Abstractions.Providers;
 using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Enums;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Providers;
 using Identity.Infrastructure.Providers.Identity;
+using Identity.Infrastructure.Providers.Storage;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -44,6 +46,7 @@ public static class DependencyInjection
   private const string ExternalProvidersSectionName = "Authentication";
 
   private const string OtelSectionName = "OpenTelemetry";
+  private const string StorageSectionName = "StorageProvider";
 
   public static IServiceCollection AddInfrastructureServices(
     this IServiceCollection services,
@@ -244,6 +247,7 @@ public static class DependencyInjection
       ReadOptions<ExternalProvidersOptions>(configuration, ExternalProvidersSectionName);
 
     services.AddScoped<ITokenService, TokenService>();
+    services.AddScoped<IStorageProvider, StorageServiceProvider>();
 
     services.AddHttpClient<IExternalIdentityProvider, GoogleAuthService>(client =>
     {
@@ -342,6 +346,11 @@ public static class DependencyInjection
       }
     });
 
+    services.AddAntiforgery(options =>
+    {
+      options.HeaderName = "X-CSRF-TOKEN";
+    });
+
     return services;
   }
 
@@ -350,6 +359,7 @@ public static class DependencyInjection
     services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
     services.Configure<ExternalProvidersOptions>(configuration.GetSection(ExternalProvidersSectionName));
     services.Configure<OpenTelemetryOptions>(configuration.GetSection(OtelSectionName));
+    services.Configure<StorageProvider>(configuration.GetSection(StorageSectionName));
 
     return services;
   }

@@ -24,8 +24,13 @@ internal static class DependencyInjection
 
   public static WebApplication UseApiServices(this WebApplication app)
   {
+    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<LogEnrichmentMiddleware>();
     app.UseRouting();
-    app.MapGroup("/api/v1/identity").MapCarter();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     if (app.Environment.IsDevelopment())
     {
@@ -33,11 +38,9 @@ internal static class DependencyInjection
       app.MapScalarApiReference(ConfigureScalar).AllowAnonymous();
     }
 
-    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-    app.UseMiddleware<CorrelationIdMiddleware>();
-    app.UseMiddleware<LogEnrichmentMiddleware>();
-    app.UseAuthentication();
-    app.UseAuthorization();
+    app.UseAntiforgery();
+
+    app.MapGroup("/api/v1/identity").MapCarter();
 
     return app;
   }
