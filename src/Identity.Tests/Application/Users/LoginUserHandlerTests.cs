@@ -40,6 +40,7 @@ public class LoginUserHandlerTests
   public async Task Handle_WithValidCredentials_ShouldReturnTokens()
   {
     // Arrange
+    DateTimeOffset before = DateTimeOffset.UtcNow;
     var role = Role.Create("test role");
 
     User existingUser = new UserBuilder().WithEmail("john_doe@test.com").WithPassword("Password@123!").WithRole(role)
@@ -65,13 +66,16 @@ public class LoginUserHandlerTests
 
     Result<LoginResponse> result = await _handler.Handle(command, CancellationToken.None);
 
+    DateTimeOffset after = DateTimeOffset.UtcNow;
+
     // Assert
     result.IsSuccess.Should().BeTrue();
 
     result.Value.AccessToken.Should().Be("jwt-token");
     result.Value.RefreshToken.Should().HaveLength(64);
     result.Value.TokenType.Should().Be("Bearer");
-    result.Value.ExpiresAt.Should().Be(DateTimeOffset.UtcNow.AddMinutes(2));
+    result.Value.ExpiresAt.Should().BeOnOrAfter(before.AddMinutes(2));
+    result.Value.ExpiresAt.Should().BeOnOrBefore(after.AddMinutes(2));
 
     _repositoryMock.Verify(x => x.AddRefreshToken(It.IsAny<RefreshToken>(), CancellationToken.None), Times.Once);
   }
