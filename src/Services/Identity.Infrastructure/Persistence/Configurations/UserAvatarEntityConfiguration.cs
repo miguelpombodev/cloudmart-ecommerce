@@ -12,6 +12,8 @@ public sealed class UserAvatarEntityConfiguration : IEntityTypeConfiguration<Use
     builder.HasKey(x => x.Id);
 
     builder.Property(x => x.AvatarUrl).HasColumnName("avatar_url").HasMaxLength(500).IsRequired();
+    builder.Property(x => x.AvatarImageName).HasColumnName("avatar_image_name").HasMaxLength(150).IsRequired();
+    builder.Property(x => x.AvatarContentType).HasColumnName("avatar_content_type").HasMaxLength(100).IsRequired();
     builder.Property(x => x.UserId).HasColumnName("user_id").IsRequired();
     builder.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true).IsRequired();
     builder.Property(rt => rt.CreatedAt).HasColumnName("created_at").IsRequired();
