@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
   public DbSet<Role> Roles => Set<Role>();
 
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+  public DbSet<UserAvatar> UserAvatars => Set<UserAvatar>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
