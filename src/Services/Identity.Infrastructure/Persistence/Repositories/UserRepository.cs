@@ -17,7 +17,10 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
 
   public override async Task<User?> FindByIdAsync(Guid id, CancellationToken ct = default)
   {
-    return await _context.Users.Include(user => user.Role).AsNoTracking()
+    return await _context.Users
+      .Include(user => user.Role)
+      .Include(user => user.UserAvatar)
+      .AsNoTracking()
       .SingleOrDefaultAsync(user => user.Id == id, ct);
   }
 
@@ -61,4 +64,10 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
 
   public void UpdateRefreshToken(RefreshToken refreshToken) =>
     _context.RefreshTokens.Update(refreshToken);
+
+  public async Task AddUserAvatar(UserAvatar userAvatar, CancellationToken ct) =>
+    await _context.UserAvatars.AddAsync(userAvatar, ct);
+
+  public void UpdateUserAvatar(UserAvatar userAvatar, CancellationToken ct) =>
+    _context.UserAvatars.Update(userAvatar);
 }
