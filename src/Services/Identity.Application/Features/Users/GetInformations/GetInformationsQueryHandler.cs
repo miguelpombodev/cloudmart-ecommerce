@@ -25,7 +25,13 @@ public sealed class GetInformationsQueryHandler: IQueryHandler<GetInformationsQu
       return Result<GetInformationsResponse>.Failure(Error.Conflict("User not registered!"));
     }
 
-    var user = new GetInformationsResponse(checkUser.Name.ToString(), checkUser.CreatedAt);
+    var user = new GetInformationsResponse(
+      checkUser.Name.ToString(),
+      checkUser.Email.Address,
+      checkUser.UserAvatar is null,
+      checkUser.UserAvatar?.AvatarUrl,
+      checkUser.Name.Initials,
+      checkUser.CreatedAt);
 
     return Result<GetInformationsResponse>.Success(user);
   }
