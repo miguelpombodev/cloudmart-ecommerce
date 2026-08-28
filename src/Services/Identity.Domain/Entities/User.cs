@@ -78,4 +78,11 @@ public sealed class User : Aggregate<Guid>
 
   public void AddRefreshToken(RefreshToken token) =>
     _refreshTokens.Add(token);
+
+  public void InactivateUser()
+  {
+    IsActive = false;
+    UpdatedAt = DateTimeOffset.UtcNow;
+    UpdatedBy = $"{Name.ToString()}";
+  }
 }
