@@ -2,7 +2,6 @@ using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
 using Identity.Application.Abstractions.Repositories;
-using Identity.Application.Features.Users.UpdateAvatar;
 using Identity.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -11,9 +10,9 @@ namespace Identity.Application.Features.Users.UpdateUser;
 
 public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result<Unit>>
 {
-  private readonly IUserRepository _repository;
-
   private readonly ILogger<UpdateUserCommandHandler> _logger;
+
+  private readonly IUserRepository _repository;
 
   private readonly IUnitOfWork _unitOfWork;
 
@@ -44,7 +43,7 @@ public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand
 
     _logger.LogInformation("New information set for User {UserId}: Data: {NewUserInformations}", newUser.Id, newUser);
 
-    _repository.UpdateAsync(newUser);
+    _repository.UpdateAsync(newUser, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     _logger.LogInformation("New information for User {UserId} were updated successfully", newUser.Id);

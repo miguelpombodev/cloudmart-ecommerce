@@ -83,13 +83,28 @@ public sealed class User : Aggregate<Guid>
   {
     IsActive = false;
     UpdatedAt = DateTimeOffset.UtcNow;
-    UpdatedBy = $"{Name.ToString()}";
+    UpdatedBy = $"{Name}";
   }
 
   public void SetName(string firstName, string lastName) =>
     Name = CompleteName.Create(firstName, lastName);
 
   public void SetEmail(string email) =>
-    this.Email = Email.Create(email);
+    Email = Email.Create(email);
 
+  public void SetAvatar(
+    string uri,
+    string fileName,
+    string contentType
+  )
+  {
+    if (UserAvatar is null)
+    {
+      UserAvatar = UserAvatar.Create(uri, Id, fileName, contentType);
+
+      return;
+    }
+
+    UserAvatar.Update(uri, fileName, contentType);
+  }
 }

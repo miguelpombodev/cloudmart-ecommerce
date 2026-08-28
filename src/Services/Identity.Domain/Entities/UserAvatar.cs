@@ -50,9 +50,15 @@ public sealed class UserAvatar : Entity<Guid>
   public void Deactivate() =>
     IsActive = false;
 
-  public void UpdateUrl(string newUrl) =>
-    AvatarUrl = newUrl;
 
-  public void UpdateFileName(string newFileName) =>
-    AvatarImageName = newFileName;
+  public void Update(
+    string uri,
+    string fileName,
+    string contentType
+  )
+  {
+    AvatarUrl = uri;
+    AvatarImageName = fileName;
+    AvatarContentType = contentType;
+  }
 }
