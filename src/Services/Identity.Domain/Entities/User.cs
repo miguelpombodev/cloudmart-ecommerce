@@ -32,7 +32,7 @@ public sealed class User : Aggregate<Guid>
 
   public CompleteName Name { get; private set; }
 
-  public Email Email { get; }
+  public Email Email { get; private set; }
 
   public Password? Password { get; private set; }
 
@@ -85,4 +85,11 @@ public sealed class User : Aggregate<Guid>
     UpdatedAt = DateTimeOffset.UtcNow;
     UpdatedBy = $"{Name.ToString()}";
   }
+
+  public void SetName(string firstName, string lastName) =>
+    Name = CompleteName.Create(firstName, lastName);
+
+  public void SetEmail(string email) =>
+    this.Email = Email.Create(email);
+
 }
