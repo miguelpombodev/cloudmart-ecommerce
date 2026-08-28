@@ -39,6 +39,7 @@ public sealed class UserBuilder
 
   private Role _role = Role.Create("Default customer role");
 
+
   public UserBuilder WithName(string firstName, string lastName)
   {
     _name = CompleteName.Create(firstName, lastName);

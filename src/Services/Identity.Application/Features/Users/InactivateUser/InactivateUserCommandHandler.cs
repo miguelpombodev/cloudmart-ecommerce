@@ -10,9 +10,9 @@ namespace Identity.Application.Features.Users.InactivateUser;
 
 public sealed class InactivateUserCommandHandler : ICommandHandler<InactivateUserCommand, Result<Unit>>
 {
-  private readonly IUserRepository _repository;
-
   private readonly ILogger<InactivateUserCommandHandler> _logger;
+
+  private readonly IUserRepository _repository;
 
   private readonly IUnitOfWork _unitOfWork;
 
@@ -41,7 +41,7 @@ public sealed class InactivateUserCommandHandler : ICommandHandler<InactivateUse
 
     checkUser.InactivateUser();
 
-    _repository.UpdateAsync(checkUser);
+    _repository.UpdateAsync(checkUser, cancellationToken);
 
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 

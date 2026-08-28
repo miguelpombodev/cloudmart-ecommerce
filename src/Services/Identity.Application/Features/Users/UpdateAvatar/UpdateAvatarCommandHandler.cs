@@ -11,9 +11,9 @@ namespace Identity.Application.Features.Users.UpdateAvatar;
 
 public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCommand, Result<UpdateAvatarResponse>>
 {
-  private readonly IUserRepository _repository;
-
   private readonly ILogger<UpdateAvatarCommandHandler> _logger;
+
+  private readonly IUserRepository _repository;
 
   private readonly IStorageProvider _storageProvider;
 
@@ -58,19 +58,9 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
     {
       bool isNewAvatar = user.UserAvatar is null;
 
-      if (isNewAvatar)
-      {
-        var userAvatar =
-          UserAvatar.Create(uploadedImage.Uri, request.UserId, uploadedImage.Name, uploadedImage.ContentType);
+      user.SetAvatar(uploadedImage.Uri, uploadedImage.Name, uploadedImage.ContentType);
 
-        await _repository.AddUserAvatar(userAvatar, cancellationToken);
-      }
-      else
-      {
-        user.UserAvatar!.UpdateFileName(uploadedImage.Name);
-        user.UserAvatar!.UpdateUrl(uploadedImage.Uri);
-        _repository.UpdateUserAvatar(user.UserAvatar, cancellationToken);
-      }
+      _repository.UpdateAsync(user, cancellationToken);
 
       await _unitOfWork.SaveChangesAsync(cancellationToken);
 

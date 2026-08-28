@@ -9,7 +9,7 @@ using Identity.Tests.Domain.Builder;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Identity.Tests.Application.Users;
+namespace Identity.Tests.Application.Users.LoginUser;
 
 public class LoginUserHandlerTests
 {

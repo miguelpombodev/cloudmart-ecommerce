@@ -29,7 +29,7 @@ public abstract class RepositoryBase<TAggregate, TId, TContext>
   public virtual async Task AddAsync(TAggregate aggregate, CancellationToken ct = default) =>
     await DbSet.AddAsync(aggregate, ct);
 
-  public virtual void UpdateAsync(TAggregate aggregate) =>
+  public virtual void UpdateAsync(TAggregate aggregate, CancellationToken none) =>
     DbSet.Update(aggregate);
 
   public virtual void RemoveAsync(TAggregate aggregate) =>
