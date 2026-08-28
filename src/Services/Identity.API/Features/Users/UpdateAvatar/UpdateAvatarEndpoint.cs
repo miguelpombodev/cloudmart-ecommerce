@@ -1,6 +1,5 @@
 using BuildingBlocks.Abstractions;
 using Carter;
-using Identity.Application.Features.Users.Login;
 using Identity.Application.Features.Users.UpdateAvatar;
 using Mapster;
 using MediatR;

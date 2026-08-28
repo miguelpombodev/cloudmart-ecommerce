@@ -28,7 +28,7 @@ public sealed class GetInformationsQueryHandler: IQueryHandler<GetInformationsQu
     var user = new GetInformationsResponse(
       checkUser.Name.ToString(),
       checkUser.Email.Address,
-      checkUser.UserAvatar is null,
+      checkUser.UserAvatar is not null,
       checkUser.UserAvatar?.AvatarUrl,
       checkUser.Name.Initials,
       checkUser.CreatedAt);
