@@ -33,7 +33,7 @@ public sealed class InactivateUserCommandHandler : ICommandHandler<InactivateUse
     if (checkUser is null)
     {
       _logger.LogWarning(
-        "User update attempted for non-existent user {UserId}",
+        "User status update attempted for non-existent user {UserId}",
         request.UserId);
 
       return Result<Unit>.Failure(Error.Conflict("User not registered!"));
