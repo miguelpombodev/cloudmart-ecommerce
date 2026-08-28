@@ -30,7 +30,14 @@ metrics_generator:
     remote_write:
       - url: http://prometheus:9090/api/v1/write
         send_exemplars: true
-
+  processor:
+    local_blocks:
+      max_live_traces: 10000
+      max_block_duration: 5m
+      max_block_bytes: 314572800
+      flush_check_period: 10s
+      trace_idle_period: 10s
+      complete_block_timeout: 15s
 storage:
   trace:
     backend: local
@@ -42,5 +49,8 @@ storage:
 overrides:
   defaults:
     metrics_generator:
-      processors: [ service-graphs, span-metrics ]
+      processors:
+        - service-graphs    # gera métricas de grafo de serviços
+        - span-metrics      # gera métricas RED por span
+        - local-blocks      # ← necessário para queries TraceQL com rate()
       generate_native_histograms: both
