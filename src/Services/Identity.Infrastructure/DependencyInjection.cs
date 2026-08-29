@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -241,7 +242,7 @@ public static class DependencyInjection
     return services;
   }
 
-  public static IServiceCollection AddProviders(this IServiceCollection services, IConfiguration configuration)
+  public static IServiceCollection AddProviders(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
   {
     ExternalProvidersOptions providersOptions =
       ReadOptions<ExternalProvidersOptions>(configuration, ExternalProvidersSectionName);
@@ -325,7 +326,7 @@ public static class DependencyInjection
         };
     });
 
-    bool isDevelopment = configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
+    bool isProduction = environment.IsProduction();
 
     services.AddAuthorization(options =>
     {
@@ -338,7 +339,7 @@ public static class DependencyInjection
         Policies.VerifiedSeller,
         policy => policy.RequireRole(nameof(RoleType.Seller)).RequireClaim("email_verified", "true"));
 
-      if (!isDevelopment)
+      if (isProduction)
       {
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
           .RequireAuthenticatedUser()
