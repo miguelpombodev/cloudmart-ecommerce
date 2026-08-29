@@ -9,7 +9,7 @@ using Identity.Tests.Domain.Builder;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Identity.Tests.Application.RefreshTokens;
+namespace Identity.Tests.Application.RefreshTokens.RefreshTokenRotation;
 
 public class RefreshTokenRotationCommandHandlerTests
 {
@@ -47,7 +47,7 @@ public class RefreshTokenRotationCommandHandlerTests
     const string rawNewRefreshToken = "new-refresh-token";
     const string hashedNewRefreshToken = "hashed-new-refresh-token";
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       user.Id,
       hashedOldRefreshToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
@@ -88,7 +88,7 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock
       .Setup(x => x.AddRefreshToken(
-        It.IsAny<RefreshToken>(),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>(),
         CancellationToken.None));
 
     _repositoryMock
@@ -137,7 +137,7 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock.Verify(
       x => x.AddRefreshToken(
-        It.Is<RefreshToken>(token =>
+        It.Is<Identity.Domain.Entities.RefreshToken>(token =>
           token.UserId == user.Id &&
           token.Token == hashedNewRefreshToken),
         CancellationToken.None),
@@ -169,7 +169,7 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock
       .Setup(x => x.RetrieveLastOldRefreshToken(hashedRefreshToken))
-      .ReturnsAsync((RefreshToken?)null);
+      .ReturnsAsync((Identity.Domain.Entities.RefreshToken?)null);
 
     // Act
     Result<RefreshTokenRotationResponse> result =
@@ -192,13 +192,13 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock.Verify(
       x => x.AddRefreshToken(
-        It.IsAny<RefreshToken>(),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
 
     _repositoryMock.Verify(
       x => x.UpdateRefreshToken(
-        It.IsAny<RefreshToken>()),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>()),
       Times.Never);
 
     _uowMock.Verify(
@@ -219,7 +219,7 @@ public class RefreshTokenRotationCommandHandlerTests
     const string hashedRefreshToken = "hashed-refresh-token";
     const string differentStoredToken = "different-hashed-token";
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       user.Id,
       differentStoredToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
@@ -257,13 +257,13 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock.Verify(
       x => x.AddRefreshToken(
-        It.IsAny<RefreshToken>(),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
 
     _repositoryMock.Verify(
       x => x.UpdateRefreshToken(
-        It.IsAny<RefreshToken>()),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>()),
       Times.Never);
 
     _uowMock.Verify(
@@ -281,7 +281,7 @@ public class RefreshTokenRotationCommandHandlerTests
 
     Guid userId = Guid.NewGuid();
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       userId,
       hashedRefreshToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
@@ -323,13 +323,13 @@ public class RefreshTokenRotationCommandHandlerTests
 
     _repositoryMock.Verify(
       x => x.AddRefreshToken(
-        It.IsAny<RefreshToken>(),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
 
     _repositoryMock.Verify(
       x => x.UpdateRefreshToken(
-        It.IsAny<RefreshToken>()),
+        It.IsAny<Identity.Domain.Entities.RefreshToken>()),
       Times.Never);
 
     _uowMock.Verify(
@@ -349,7 +349,7 @@ public class RefreshTokenRotationCommandHandlerTests
     const string rawRefreshToken = "old-refresh-token";
     const string hashedRefreshToken = "hashed-old-refresh-token";
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       user.Id,
       hashedRefreshToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
@@ -417,7 +417,7 @@ public class RefreshTokenRotationCommandHandlerTests
     const string rawNewRefreshToken = "new-refresh-token";
     const string hashedNewRefreshToken = "hashed-new-refresh-token";
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       user.Id,
       hashedOldRefreshToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
@@ -466,7 +466,7 @@ public class RefreshTokenRotationCommandHandlerTests
     // Assert
     _repositoryMock.Verify(
       x => x.AddRefreshToken(
-        It.Is<RefreshToken>(token =>
+        It.Is<Identity.Domain.Entities.RefreshToken>(token =>
           token.UserId == user.Id &&
           token.Token == hashedNewRefreshToken),
         CancellationToken.None),
@@ -484,7 +484,7 @@ public class RefreshTokenRotationCommandHandlerTests
     const string rawRefreshToken = "old-refresh-token";
     const string hashedRefreshToken = "hashed-old-refresh-token";
 
-    RefreshToken oldToken = RefreshToken.Create(
+    Identity.Domain.Entities.RefreshToken oldToken = Identity.Domain.Entities.RefreshToken.Create(
       user.Id,
       hashedRefreshToken,
       DateTimeOffset.UtcNow.AddMinutes(10));
