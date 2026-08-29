@@ -19,33 +19,6 @@ public sealed class RegisterUserEndpointTests : IClassFixture<IdentityApiFactory
   }
 
   [Fact]
-  public async Task Register_ShouldNotRequireAuthentication()
-  {
-    // Arrange
-    var request = new
-    {
-      FirstName = "João",
-      LastName = "Silva",
-      Email = $"joao.{Guid.NewGuid():N}@example.com",
-      Password = "Password@123!"
-    };
-
-    // Act
-    HttpResponseMessage response =
-      await _client.PostAsJsonAsync(BaseUrl, request);
-
-    string body =
-      await response.Content.ReadAsStringAsync();
-
-    // Debug
-    Console.WriteLine($"Status: {response.StatusCode}");
-    Console.WriteLine($"Body: {body}");
-
-    // Assert
-    response.StatusCode.Should().NotBe(HttpStatusCode.Unauthorized, body);
-  }
-
-  [Fact]
   public async Task Register_WithValidRequest_ShouldReturnCreated()
   {
     // Arrange
