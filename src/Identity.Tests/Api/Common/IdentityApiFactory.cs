@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Identity.Tests.Api.Common;
 
@@ -29,13 +30,7 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncL
       // Remove o DbContext registrado pelo Program.cs real (que apontaria
       // para o banco do Docker Compose) e registra um novo apontando
       // para o container efêmero do teste.
-      ServiceDescriptor? descriptor =
-        services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-
-      if (descriptor is not null)
-      {
-        services.Remove(descriptor);
-      }
+      services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
 
       services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(_dbContainer.ConnectionString));

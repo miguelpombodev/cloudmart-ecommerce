@@ -30,11 +30,11 @@ public sealed class RegisterUserEndpoint : ICarterModule
 
         return Results.Created($"/{response.Id}", response);
       })
+      .AllowAnonymous()
       .WithName("RegisterUser")
       .Produces<RegisterUserResponse>(StatusCodes.Status201Created)
       .ProducesProblem(StatusCodes.Status400BadRequest)
       .WithSummary("Register User")
-      .WithDescription("Register User")
-      .AllowAnonymous();
+      .WithDescription("Register User");
   }
 }
