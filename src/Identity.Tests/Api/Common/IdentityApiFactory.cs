@@ -25,6 +25,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>, IAsyncL
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
+    builder.UseEnvironment("Testing");
+
     builder.ConfigureServices(services =>
     {
       // Remove o DbContext registrado pelo Program.cs real (que apontaria
