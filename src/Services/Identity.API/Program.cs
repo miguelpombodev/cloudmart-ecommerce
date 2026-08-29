@@ -14,7 +14,7 @@ builder.Services
   .AddMassTransitConfiguration(configuration)
   .AddTelemetryServices(configuration)
   .AddRepositories()
-  .AddProviders(configuration)
+  .AddProviders(configuration, builder.Environment)
   .AddLoggingServices(configuration, builder.Environment)
   .AddApplicationServices()
   .AddApiServices();
