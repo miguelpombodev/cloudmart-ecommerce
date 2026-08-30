@@ -17,7 +17,6 @@ builder.Services
   .AddDatabaseConfigurations<ApplicationDbContext>(configuration, environment)
   .AddRepositories()
   .AddMassTransitConfiguration(configuration)
-  .AddTelemetryProviderConfiguration(configuration)
   .AddProviders(configuration, builder.Environment)
   .AddJwtAuthenticationWithCookie(configuration)
   .AddAuthenticationWithPolicies(builder.Environment)
