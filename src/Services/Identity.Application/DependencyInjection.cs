@@ -11,21 +11,27 @@ namespace Identity.Application;
 
 public static class DependencyInjection
 {
-  public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-  {
-    var applicationAssembly = Assembly.GetExecutingAssembly();
+  private static readonly Assembly ApplicationAssembly = Assembly.GetExecutingAssembly();
 
+  public static IServiceCollection AddCQRSRegistration(this IServiceCollection services)
+  {
     services.AddMediatR(x =>
     {
-      x.RegisterServicesFromAssemblies(applicationAssembly);
+      x.RegisterServicesFromAssemblies(ApplicationAssembly);
       x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     });
 
-    services.AddValidatorsFromAssembly(applicationAssembly);
+    return services;
+  }
+
+  public static IServiceCollection AddFluentValidationConfiguration(this IServiceCollection services)
+  {
+    services.AddValidatorsFromAssembly(ApplicationAssembly);
 
     TypeAdapterConfig config = TypeAdapterConfig.GlobalSettings;
     config.Scan(Assembly.GetExecutingAssembly());
 
     return services;
   }
+
 }
