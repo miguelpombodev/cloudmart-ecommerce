@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using Identity.Application.Abstractions.Options;
+using BuildingBlocks.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
