@@ -56,6 +56,8 @@ public static class ScalarConfig
 
     app.UseAntiforgery();
 
+    app.UseHttpsRedirection();
+
     return app;
   }
 
