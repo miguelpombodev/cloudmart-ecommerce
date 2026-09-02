@@ -58,7 +58,7 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
     {
       _logger.LogWarning(
         "There was an attempt create a registered user in database. Email: {UserEmail}",
-        checkUserExists.Email.Address);
+        checkUserExists.RetrieveMaskedEmail());
 
       return Result<RegisterUserResponse>.Failure(Error.Conflict("User already registered!"));
     }
@@ -72,7 +72,7 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
       }
     );
 
-    _logger.LogInformation("Sending notification for email {UserEmail} ", user.Email.Address);
+    _logger.LogInformation("Sending notification for email {UserEmail} ", user.RetrieveMaskedEmail());
 
     await _publishEndpoint.Publish<INotificationRequest>(
       new NotificationRequested()
