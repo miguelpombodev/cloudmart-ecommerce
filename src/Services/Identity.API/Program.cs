@@ -20,10 +20,12 @@ builder.Services
   .AddProviders(configuration, builder.Environment)
   .AddJwtAuthenticationWithCookie(configuration)
   .AddAuthenticationWithPolicies(builder.Environment)
+  .AddNonHttpResilience(configuration)
   .AddAntiForgeryService()
   .AddCQRSRegistration()
   .AddFluentValidationConfiguration()
   .AddApiServices();
+
 
 WebApplication app = builder.Build();
 
