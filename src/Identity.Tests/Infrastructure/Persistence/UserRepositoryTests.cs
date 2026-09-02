@@ -48,7 +48,7 @@ public sealed class UserRepositoryTests : IClassFixture<PostgreSqlFixture>, IAsy
     await repository.AddAsync(user);
     await context.SaveChangesAsync();
 
-    User? found = await repository.FindByEmail("findme@example.com");
+    User? found = await repository.FindByEmail("findme@example.com", CancellationToken.None);
 
     found.Should().NotBeNull();
     found!.Id.Should().Be(user.Id);
@@ -60,7 +60,7 @@ public sealed class UserRepositoryTests : IClassFixture<PostgreSqlFixture>, IAsy
     await using ApplicationDbContext context = _fixture.CreateContext();
     var repository = new UserRepository(context);
 
-    User? found = await repository.FindByEmail("nonexistent@example.com");
+    User? found = await repository.FindByEmail("nonexistent@example.com", CancellationToken.None);
 
     found.Should().BeNull();
   }
