@@ -9,6 +9,7 @@ using Identity.Tests.Domain.Builder;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.Register;
 
@@ -24,12 +25,15 @@ public class RegisterUserCommandHandlerTests
 
   private readonly Mock<IPublishEndpoint> _publishEndpointMock;
 
+  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
+
   public RegisterUserCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _roleRepositoryMock = new Mock<IRoleRepository>();
     _uowMock = new Mock<IUnitOfWork>();
     _publishEndpointMock = new Mock<IPublishEndpoint>();
+    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     var logger = new Mock<ILogger<RegisterUserCommandHandler>>();
 
@@ -37,6 +41,7 @@ public class RegisterUserCommandHandlerTests
       _repositoryMock.Object,
       _roleRepositoryMock.Object,
       _uowMock.Object,
+      _pipeline.Object,
       _publishEndpointMock.Object,
       logger.Object);
   }
@@ -54,7 +59,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -82,7 +87,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -116,7 +121,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -145,7 +150,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -176,7 +181,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -215,7 +220,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -246,7 +251,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -259,8 +264,7 @@ public class RegisterUserCommandHandlerTests
       .Setup(p => p.Publish<INotificationRequest>(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
-      .Callback<INotificationRequest, CancellationToken>(
-        (notification, _) => publishedNotification = notification);
+      .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
 
     // Act
     await _commandHandler.Handle(command, CancellationToken.None);
@@ -283,7 +287,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -296,8 +300,7 @@ public class RegisterUserCommandHandlerTests
       .Setup(p => p.Publish<INotificationRequest>(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
-      .Callback<INotificationRequest, CancellationToken>(
-        (notification, _) => publishedNotification = notification);
+      .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
 
     // Act
     await _commandHandler.Handle(command, CancellationToken.None);
@@ -320,7 +323,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -333,8 +336,7 @@ public class RegisterUserCommandHandlerTests
       .Setup(p => p.Publish<INotificationRequest>(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
-      .Callback<INotificationRequest, CancellationToken>(
-        (notification, _) => publishedNotification = notification);
+      .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
 
     // Act
     await _commandHandler.Handle(command, CancellationToken.None);
@@ -370,7 +372,7 @@ public class RegisterUserCommandHandlerTests
       "Senha@123");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(existingUser);
 
     // Act
@@ -399,7 +401,7 @@ public class RegisterUserCommandHandlerTests
       "Senha@123");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(existingUser);
 
     // Act
@@ -428,7 +430,7 @@ public class RegisterUserCommandHandlerTests
       "Senha@123");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(existingUser);
 
     // Act
@@ -455,7 +457,7 @@ public class RegisterUserCommandHandlerTests
       "Senha@123");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(existingUser);
 
     // Act
@@ -480,7 +482,7 @@ public class RegisterUserCommandHandlerTests
       "Senha@123");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(It.IsAny<string>()))
+      .Setup(r => r.FindByEmail(It.IsAny<string>(), CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -494,7 +496,7 @@ public class RegisterUserCommandHandlerTests
 
     // Assert
     _repositoryMock.Verify(
-      r => r.FindByEmail("joao@example.com"),
+      r => r.FindByEmail("joao@example.com", CancellationToken.None),
       Times.Once);
   }
 
@@ -514,7 +516,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -559,7 +561,7 @@ public class RegisterUserCommandHandlerTests
     var exception = new InvalidOperationException("Database error");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ThrowsAsync(exception);
 
     // Act
@@ -591,7 +593,7 @@ public class RegisterUserCommandHandlerTests
     var exception = new InvalidOperationException("Role not found");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -640,7 +642,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -688,7 +690,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -737,7 +739,7 @@ public class RegisterUserCommandHandlerTests
     Role role = Role.Create("Customer");
 
     _repositoryMock
-      .Setup(r => r.FindByEmail(command.Email))
+      .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -774,4 +776,3 @@ public class RegisterUserCommandHandlerTests
     result.IsSuccess.Should().BeTrue();
   }
 }
-

@@ -8,6 +8,7 @@ using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.LoginUser;
 
@@ -21,11 +22,14 @@ public class LoginUserHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
+  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
+
   public LoginUserHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _uowMock = new Mock<IUnitOfWork>();
     _tokenServiceMock = new Mock<ITokenService>();
+    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     var logger = new Mock<ILogger<LoginCommandHandler>>();
 
@@ -33,6 +37,7 @@ public class LoginUserHandlerTests
       _repositoryMock.Object,
       _tokenServiceMock.Object,
       _uowMock.Object,
+      _pipeline.Object,
       logger.Object);
   }
 
@@ -58,7 +63,7 @@ public class LoginUserHandlerTests
     );
 
     // Act
-    _repositoryMock.Setup(r => r.FindByEmail(command.Email)).ReturnsAsync(existingUser);
+    _repositoryMock.Setup(r => r.FindByEmail(command.Email, CancellationToken.None)).ReturnsAsync(existingUser);
     _repositoryMock.Setup(r => r.AddRefreshToken(refreshToken, CancellationToken.None));
     _tokenServiceMock.Setup(t => t.GenerateAccessToken(existingUser)).Returns(tokenResult);
     _tokenServiceMock.Setup(t => t.GenerateRefreshToken()).Returns(new string('*', 64));
@@ -90,7 +95,7 @@ public class LoginUserHandlerTests
       "127.0.0.1");
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(command.Email))
+      .Setup(x => x.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     // Act
@@ -126,7 +131,7 @@ public class LoginUserHandlerTests
       "127.0.0.1");
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(command.Email))
+      .Setup(x => x.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(user);
 
     // Act
@@ -160,7 +165,7 @@ public class LoginUserHandlerTests
       "127.0.0.1");
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(command.Email))
+      .Setup(x => x.FindByEmail(command.Email, CancellationToken.None))
       .ReturnsAsync(user);
 
     // Act

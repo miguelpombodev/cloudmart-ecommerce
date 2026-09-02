@@ -10,6 +10,7 @@ using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.SocialLogin.Google;
 
@@ -27,6 +28,8 @@ public class GoogleLoginCommandHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
+  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
+
   public GoogleLoginCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
@@ -34,6 +37,7 @@ public class GoogleLoginCommandHandlerTests
     _tokenServiceMock = new Mock<ITokenService>();
     _googleProviderMock = new Mock<IExternalIdentityProvider>();
     _uowMock = new Mock<IUnitOfWork>();
+    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     var logger = new Mock<ILogger<GoogleLoginCommandHandler>>();
 
@@ -42,6 +46,7 @@ public class GoogleLoginCommandHandlerTests
       _roleRepositoryMock.Object,
       _tokenServiceMock.Object,
       _googleProviderMock.Object,
+      _pipeline.Object,
       logger.Object,
       _uowMock.Object);
   }
@@ -68,11 +73,12 @@ public class GoogleLoginCommandHandlerTests
     result.IsFailure.Should().BeTrue();
 
     result.Error.StatusCode.Should().Be(401);
+
     result.Error.Description.Should()
       .Be("Invalid or expired Google token");
 
     _repositoryMock.Verify(
-      x => x.FindByEmail(It.IsAny<string>()),
+      x => x.FindByEmail(It.IsAny<string>(), CancellationToken.None),
       Times.Never);
 
     _uowMock.Verify(
@@ -109,11 +115,12 @@ public class GoogleLoginCommandHandlerTests
     result.IsFailure.Should().BeTrue();
 
     result.Error.StatusCode.Should().Be(401);
+
     result.Error.Description.Should()
       .Be("Google account does not have a verified email");
 
     _repositoryMock.Verify(
-      x => x.FindByEmail(It.IsAny<string>()),
+      x => x.FindByEmail(It.IsAny<string>(), CancellationToken.None),
       Times.Never);
 
     _uowMock.Verify(
@@ -149,7 +156,7 @@ public class GoogleLoginCommandHandlerTests
       .ReturnsAsync(externalUser);
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(externalUser.Email))
+      .Setup(x => x.FindByEmail(externalUser.Email, CancellationToken.None))
       .ReturnsAsync((User?)null);
 
     _roleRepositoryMock
@@ -284,7 +291,7 @@ public class GoogleLoginCommandHandlerTests
       .ReturnsAsync(externalUser);
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(externalUser.Email))
+      .Setup(x => x.FindByEmail(externalUser.Email, CancellationToken.None))
       .ReturnsAsync(user);
 
     _repositoryMock
@@ -375,7 +382,7 @@ public class GoogleLoginCommandHandlerTests
       .ReturnsAsync(externalUser);
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(externalUser.Email))
+      .Setup(x => x.FindByEmail(externalUser.Email, CancellationToken.None))
       .ReturnsAsync(user);
 
     _repositoryMock
@@ -464,7 +471,7 @@ public class GoogleLoginCommandHandlerTests
       .ReturnsAsync(externalUser);
 
     _repositoryMock
-      .Setup(x => x.FindByEmail(externalUser.Email))
+      .Setup(x => x.FindByEmail(externalUser.Email, CancellationToken.None))
       .ReturnsAsync(user);
 
     // Act
@@ -477,6 +484,7 @@ public class GoogleLoginCommandHandlerTests
     result.IsFailure.Should().BeTrue();
 
     result.Error.StatusCode.Should().Be(401);
+
     result.Error.Description.Should()
       .Be("Invalid credentials");
 
@@ -516,4 +524,3 @@ public class GoogleLoginCommandHandlerTests
       role);
   }
 }
-

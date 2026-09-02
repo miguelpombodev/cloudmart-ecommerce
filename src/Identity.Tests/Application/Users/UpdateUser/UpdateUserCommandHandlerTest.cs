@@ -8,6 +8,7 @@ using Identity.Tests.Domain.Builder;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.UpdateUser;
 
@@ -19,16 +20,20 @@ public class UpdateUserCommandHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
+  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
+
   public UpdateUserCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _uowMock = new Mock<IUnitOfWork>();
+    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     var logger = new Mock<ILogger<UpdateUserCommandHandler>>();
 
     _handler = new UpdateUserCommandHandler(
       _repositoryMock.Object,
       logger.Object,
+      _pipeline.Object,
       _uowMock.Object);
   }
 

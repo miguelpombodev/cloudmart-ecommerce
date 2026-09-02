@@ -5,6 +5,8 @@ using Identity.Application.Features.Users.GetInformations;
 using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;
 using Moq;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.GetInformations;
 
@@ -14,12 +16,17 @@ public class GetInformationsQueryHandlerTests
 
   private readonly Mock<IUserRepository> _repositoryMock;
 
+  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
+
   public GetInformationsQueryHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
+    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     _handler = new GetInformationsQueryHandler(
-      _repositoryMock.Object);
+      _repositoryMock.Object,
+      _pipeline.Object
+    );
   }
 
   [Fact]
