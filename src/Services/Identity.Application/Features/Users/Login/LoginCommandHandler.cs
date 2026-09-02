@@ -5,6 +5,8 @@ using Identity.Application.Abstractions.Auth;
 using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Application.Features.Users.Login;
 
@@ -16,23 +18,28 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
 
   private readonly ITokenService _tokenService;
 
+  private readonly ResiliencePipeline _databasePipeline;
+
   private readonly IUnitOfWork _uow;
 
   public LoginCommandHandler(
     IUserRepository repository,
     ITokenService tokenService,
     IUnitOfWork uow,
+    ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<LoginCommandHandler> logger)
   {
     _repository = repository;
     _tokenService = tokenService;
     _uow = uow;
+    _databasePipeline = pipelineProvider.GetPipeline("database-operations");
     _logger = logger;
   }
 
   public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
   {
-    User? user = await _repository.FindByEmail(request.Email);
+    User? user = await _databasePipeline
+      .ExecuteAsync(async ct => await _repository.FindByEmail(request.Email, ct), cancellationToken);
 
     if (user?.Password is null || !user.Password.Verify(request.Password) || !user.IsActive)
     {
@@ -45,8 +52,11 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
 
     var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, tokenResult.ExpiresAt);
 
-    await _repository.AddRefreshToken(refreshToken, cancellationToken);
-    await _uow.SaveChangesAsync(cancellationToken);
+    await _databasePipeline.ExecuteAsync(async ct =>
+    {
+      await _repository.AddRefreshToken(refreshToken, ct);
+      await _uow.SaveChangesAsync(ct);
+    });
 
     _logger.LogInformation("User {UserEmail} logged successfully", user.RetrieveMaskedEmail());
 

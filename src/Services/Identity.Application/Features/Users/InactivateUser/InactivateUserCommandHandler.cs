@@ -5,6 +5,8 @@ using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Application.Features.Users.InactivateUser;
 
@@ -16,19 +18,26 @@ public sealed class InactivateUserCommandHandler : ICommandHandler<InactivateUse
 
   private readonly IUnitOfWork _unitOfWork;
 
+  private readonly ResiliencePipeline _databasePipeline;
+
   public InactivateUserCommandHandler(
     IUserRepository repository,
     IUnitOfWork unitOfWork,
+    ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<InactivateUserCommandHandler> logger)
   {
     _logger = logger;
     _unitOfWork = unitOfWork;
     _repository = repository;
+    _databasePipeline = pipelineProvider.GetPipeline("database-operations");
   }
 
   public async Task<Result<Unit>> Handle(InactivateUserCommand request, CancellationToken cancellationToken)
   {
-    User? checkUser = await _repository.FindByIdAsync(request.UserId, cancellationToken);
+    User? checkUser = await _databasePipeline.ExecuteAsync(async ct => await _repository.FindByIdAsync(
+        request.UserId, ct
+      )
+    );
 
     if (checkUser is null)
     {
@@ -41,9 +50,11 @@ public sealed class InactivateUserCommandHandler : ICommandHandler<InactivateUse
 
     checkUser.InactivateUser();
 
-    _repository.UpdateAsync(checkUser, cancellationToken);
-
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    await _databasePipeline.ExecuteAsync(async ct =>
+    {
+      _repository.UpdateAsync(checkUser, ct);
+      await _unitOfWork.SaveChangesAsync(ct);
+    });
 
     _logger.LogInformation("User {UserId} inactivated successfully", checkUser.Id);
 

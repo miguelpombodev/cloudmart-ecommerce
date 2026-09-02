@@ -2,6 +2,7 @@ using BuildingBlocks.Infrastructure;
 using Identity.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Identity.Infrastructure.Persistence;
 
@@ -33,14 +34,19 @@ public sealed class UnitOfWork : IUnitOfWork
 
       throw new DbException(" A concurrency violation is encountered when trying to saving data");
     }
-    catch (DbUpdateException e)
+    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+    {
+      _logger.LogCritical("Duplicate entry detected during retry for {Entries}", ex.Entries);
+      throw new DbException("An error occurred while persisting data");
+    }
+
+    catch (DbUpdateException ex)
     {
       _logger.LogCritical(
-        e,
+        ex,
         "[CRITICAL] There was an error when trying to saving any data in context - Message: {ErrorMessage} Trace: {ErrorTrace}",
-        e.Message,
-        e.StackTrace);
-
+        ex.Message,
+        ex.StackTrace);
       throw new DbException("An error occurred while persisting data");
     }
   }

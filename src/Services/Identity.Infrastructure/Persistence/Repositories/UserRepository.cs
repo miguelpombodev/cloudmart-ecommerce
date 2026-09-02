@@ -49,8 +49,8 @@ public sealed class UserRepository : RepositoryBase<User, Guid, ApplicationDbCon
     return result;
   }
 
-  public async Task<User?> FindByEmail(string email) =>
-    await _context.Users.Include(u => u.Role).AsNoTracking().FirstOrDefaultAsync(user => user.Email.Address == email);
+  public async Task<User?> FindByEmail(string email, CancellationToken ct) =>
+    await _context.Users.Include(u => u.Role).AsNoTracking().FirstOrDefaultAsync(user => user.Email.Address == email, ct);
 
   public async Task<RefreshToken> AddRefreshToken(RefreshToken token, CancellationToken ct)
   {
