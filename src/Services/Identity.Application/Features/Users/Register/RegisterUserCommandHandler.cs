@@ -9,6 +9,8 @@ using Identity.Domain.ValueObject;
 using Mapster;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Application.Features.Users.Register;
 
@@ -24,12 +26,16 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
 
   private readonly IPublishEndpoint _publishEndpoint;
 
+  private readonly ResiliencePipeline _databasePipeline;
+
+
   private readonly IUnitOfWork _uow;
 
   public RegisterUserCommandHandler(
     IUserRepository repository,
     IRoleRepository roleRepository,
     IUnitOfWork uow,
+    ResiliencePipelineProvider<string> pipelineProvider,
     IPublishEndpoint publishEndpoint,
     ILogger<RegisterUserCommandHandler> logger)
   {
@@ -38,13 +44,15 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
     _uow = uow;
     _publishEndpoint = publishEndpoint;
     _logger = logger;
+    _databasePipeline = pipelineProvider.GetPipeline("database-operations");
   }
 
   public async Task<Result<RegisterUserResponse>> Handle(
     RegisterUserCommand request,
     CancellationToken cancellationToken)
   {
-    User? checkUserExists = await _repository.FindByEmail(request.Email);
+    User? checkUserExists =
+      await _databasePipeline.ExecuteAsync(async ct => await _repository.FindByEmail(request.Email, ct));
 
     if (checkUserExists is not null)
     {
@@ -55,11 +63,40 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
       return Result<RegisterUserResponse>.Failure(Error.Conflict("User already registered!"));
     }
 
+    User user = await CreateUserAsync(request, cancellationToken);
+
+    await _databasePipeline.ExecuteAsync(async ct =>
+      {
+        await _repository.AddAsync(user, ct);
+        await _uow.SaveChangesAsync(ct);
+      }
+    );
+
+    _logger.LogInformation("Sending notification for email {UserEmail} ", user.Email.Address);
+
+    await _publishEndpoint.Publish<INotificationRequest>(
+      new NotificationRequested()
+      {
+        Recipient = user.Email.Address,
+        Template = WelcomeTemplateName,
+        Data =
+        {
+          { "name", user.Name.FirstName },
+          { "subject", "Welcome to CloudMart!" },
+          { "loginUrl", "https://cloudmart.example.com/login" }
+        }
+      }, cancellationToken);
+
+    return user.Adapt<RegisterUserResponse>();
+  }
+
+  private async Task<User> CreateUserAsync(RegisterUserCommand request, CancellationToken ct)
+  {
     var completeNameResult = CompleteName.Create(request.FirstName, request.LastName);
     var passwordResult = Password.CreateWithNoProvider(request.Password);
     var emailResult = Email.Create(request.Email);
 
-    Role role = await _roleRepository.FindRoleByName("Customer", cancellationToken);
+    Role role = await _roleRepository.FindRoleByName("Customer", ct);
 
     Result<User> userResult = User.Create(
       completeNameResult,
@@ -67,23 +104,6 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
       passwordResult,
       role);
 
-    await _repository.AddAsync(userResult.Value, cancellationToken);
-    await _uow.SaveChangesAsync(cancellationToken);
-
-    _logger.LogInformation("Sending notification for email {UserEmail} ", userResult.Value.Email.Address);
-
-    await _publishEndpoint.Publish<INotificationRequest>(new NotificationRequested()
-    {
-      Recipient = emailResult.Address,
-      Template = WelcomeTemplateName,
-      Data =
-      {
-        { "name", userResult.Value.Name.FirstName},
-        {"subject", "Welcome to CloudMart!"},
-        {"loginUrl", "https://cloudmart.example.com/login"}
-      }
-    }, cancellationToken);
-
-    return userResult.Value.Adapt<RegisterUserResponse>();
+    return userResult.Value;
   }
 }

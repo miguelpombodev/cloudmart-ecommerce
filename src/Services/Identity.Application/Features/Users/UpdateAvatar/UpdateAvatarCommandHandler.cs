@@ -6,6 +6,8 @@ using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Dtos.Storage;
 using Identity.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Application.Features.Users.UpdateAvatar;
 
@@ -15,6 +17,10 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
 
   private readonly IUserRepository _repository;
 
+  private readonly ResiliencePipeline _databasePipeline;
+
+  private readonly ResiliencePipeline _storagePipeline;
+
   private readonly IStorageProvider _storageProvider;
 
   private readonly IUnitOfWork _unitOfWork;
@@ -22,12 +28,15 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
   public UpdateAvatarCommandHandler(
     IUserRepository repository,
     IStorageProvider storageProvider,
+    ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<UpdateAvatarCommandHandler> logger,
     IUnitOfWork unitOfWork)
   {
     _repository = repository;
     _storageProvider = storageProvider;
     _logger = logger;
+    _databasePipeline = pipelineProvider.GetPipeline("database-operations");
+    _storagePipeline = pipelineProvider.GetPipeline("storage-operations");
     _unitOfWork = unitOfWork;
   }
 
@@ -35,7 +44,11 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
     UpdateAvatarCommand request,
     CancellationToken cancellationToken)
   {
-    User? user = await _repository.FindByIdAsync(request.UserId, cancellationToken);
+    User? user = await _databasePipeline.ExecuteAsync(async ct => await _repository.FindByIdAsync(
+        request.UserId,
+        ct
+      )
+    );
 
     if (user is null)
     {
@@ -48,7 +61,12 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
 
     string? previewImageName = user.UserAvatar?.AvatarImageName;
 
-    StorageUploadResponseDto uploadedImage = await _storageProvider.UploadImage(request.File, cancellationToken);
+    StorageUploadResponseDto uploadedImage = await _storagePipeline.ExecuteAsync(async ct =>
+      await _storageProvider.UploadImage(
+        request.File,
+        ct
+      )
+    );
 
     _logger.LogInformation(
       "New avatar uploaded to storage for user {UserId}. BlobName: {BlobName}",
@@ -60,13 +78,15 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
 
       user.SetAvatar(uploadedImage.Uri, uploadedImage.Name, uploadedImage.ContentType);
 
-      _repository.UpdateAsync(user, cancellationToken);
-
-      await _unitOfWork.SaveChangesAsync(cancellationToken);
+      await _databasePipeline.ExecuteAsync(async ct =>
+      {
+        _repository.UpdateAsync(user, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+      });
 
       if (!isNewAvatar && previewImageName is not null)
       {
-        await DeletePreviousImageSafelyAsync(previewImageName, user.Id, cancellationToken);
+        await DeletePreviousImageSafelyAsync(previewImageName, user.Id);
       }
 
       string action = isNewAvatar ? "created" : "updated";
@@ -84,7 +104,7 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
         "Rolling back storage upload. BlobName: {BlobName}",
         user.Id, uploadedImage.Name);
 
-      await RollbackUploadSafelyAsync(uploadedImage.Name, user.Id, cancellationToken);
+      await RollbackUploadSafelyAsync(uploadedImage.Name, user.Id);
 
       return Result<UpdateAvatarResponse>.Failure(
         Error.Failure("Failed to update avatar. Please try again."));
@@ -93,13 +113,16 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
 
   private async Task DeletePreviousImageSafelyAsync(
     string imageName,
-    Guid userId,
-    CancellationToken ct
+    Guid userId
   )
   {
     try
     {
-      await _storageProvider.DeleteImage(imageName, ct);
+      await _storagePipeline.ExecuteAsync(async cancel => await _storageProvider.DeleteImage(
+          imageName,
+          cancel
+        )
+      );
 
       _logger.LogInformation(
         "Previous avatar deleted from storage for user {UserId}. BlobName: {BlobName}",
@@ -117,13 +140,16 @@ public sealed class UpdateAvatarCommandHandler : ICommandHandler<UpdateAvatarCom
 
   private async Task RollbackUploadSafelyAsync(
     string imageName,
-    Guid userId,
-    CancellationToken ct
+    Guid userId
   )
   {
     try
     {
-      await _storageProvider.DeleteImage(imageName, ct);
+      await _storagePipeline.ExecuteAsync(async ct => await _storageProvider.DeleteImage(
+          imageName,
+          ct
+        )
+      );
 
       _logger.LogInformation(
         "Storage rollback successful for user {UserId}. BlobName: {BlobName}",

@@ -28,4 +28,10 @@ public static class ResilienceExtensions
 
     return services;
   }
+
+  public static IServiceCollection AddStorageProviderResilience(this IServiceCollection services, IConfiguration configuration)
+  {
+
+    return services;
+  }
 }

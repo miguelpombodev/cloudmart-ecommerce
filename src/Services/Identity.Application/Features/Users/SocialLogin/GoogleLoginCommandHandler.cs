@@ -8,6 +8,8 @@ using Identity.Domain.Entities;
 using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Registry;
 
 namespace Identity.Application.Features.Users.SocialLogin;
 
@@ -21,6 +23,8 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
 
   private readonly IRoleRepository _roleRepository;
 
+  private readonly ResiliencePipeline _databasePipeline;
+
   private readonly ITokenService _tokenService;
 
   private readonly IUnitOfWork _uow;
@@ -30,6 +34,7 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
     IRoleRepository roleRepository,
     ITokenService tokenService,
     IExternalIdentityProvider googleProvider,
+    ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<GoogleLoginCommandHandler> logger,
     IUnitOfWork uow)
   {
@@ -39,6 +44,7 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
     _googleProvider = googleProvider;
     _logger = logger;
     _uow = uow;
+    _databasePipeline = pipelineProvider.GetPipeline("database-operations");
   }
 
   public async Task<Result<LoginResponse>> Handle(
@@ -60,7 +66,8 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
         Error.Unauthorized("Google account does not have a verified email"));
     }
 
-    User? user = await _repository.FindByEmail(externalUser.Email);
+    User? user =
+      await _databasePipeline.ExecuteAsync(async ct => await _repository.FindByEmail(externalUser.Email, ct));
 
     if (user is null)
     {
@@ -73,10 +80,12 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
     }
 
     UserAuthenticationProvider? checkUserAuthenticationProvider =
-      await _repository.FindUserAuthenticationByProviderAsync(
-        externalUser.Email,
-        externalUser.Provider,
-        cancellationToken);
+      await _databasePipeline.ExecuteAsync(async ct => await _repository.FindUserAuthenticationByProviderAsync(
+          externalUser.Email,
+          externalUser.Provider,
+          ct
+        )
+      );
 
     if (checkUserAuthenticationProvider is null)
     {
@@ -88,7 +97,12 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
           user.Email
         );
 
-      await _repository.AddUserAuthenticationProviderAsync(userAuthenticationProvider, cancellationToken);
+      await _databasePipeline.ExecuteAsync(async ct =>
+        await _repository.AddUserAuthenticationProviderAsync(
+          userAuthenticationProvider,
+          ct
+        )
+      );
     }
 
     TokenResult tokenResult = _tokenService.GenerateAccessToken(user);
@@ -98,9 +112,11 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
     var refreshToken = RefreshToken.Create(
       user.Id, hashedToken, tokenResult.ExpiresAt);
 
-    await _repository.AddRefreshToken(refreshToken, cancellationToken);
-
-    await _uow.SaveChangesAsync(cancellationToken);
+    await _databasePipeline.ExecuteAsync(async ct =>
+    {
+      await _repository.AddRefreshToken(refreshToken, ct);
+      await _uow.SaveChangesAsync(ct);
+    });
 
     _logger.LogInformation(
       "User {Email} logged in via {Provider}",
@@ -115,7 +131,12 @@ public sealed class GoogleLoginCommandHandler : ICommandHandler<GoogleLoginComma
 
   private async Task<User> CreateUserAuthenticated(ExternalUserInfo externalUser, CancellationToken ct)
   {
-    Role customerRole = await _roleRepository.FindRoleByName(nameof(RoleType.Customer), ct);
+    Role customerRole = await _databasePipeline.ExecuteAsync(async ct =>
+      await _roleRepository.FindRoleByName(
+        nameof(RoleType.Customer),
+        ct
+      )
+    );
 
     var completeName = CompleteName.Create(
       externalUser.FirstName ?? externalUser.Email.Split('@')[0],
