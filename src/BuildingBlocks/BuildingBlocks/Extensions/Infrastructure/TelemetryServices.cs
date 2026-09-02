@@ -40,6 +40,7 @@ public static class TelemetryServices
           .AddHttpClientInstrumentation()
           .AddEntityFrameworkCoreInstrumentation()
           .AddMassTransitInstrumentation()
+          .AddSource("Microsoft.Extensions.Resilience")
           .AddSource($"{openTelemetryOptions.ApplicationName}.*")
           .AddNpgsql()
           .AddOtlpExporter(options => { options.Endpoint = new Uri(otelExporterUrl); });
