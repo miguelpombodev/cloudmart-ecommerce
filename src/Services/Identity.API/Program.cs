@@ -1,3 +1,4 @@
+using BuildingBlocks.Extensions.API;
 using BuildingBlocks.Extensions.Infrastructure;
 using Cloudmart.Identity;
 using Identity.Application;
@@ -25,12 +26,15 @@ builder.Services
   .AddAntiForgeryService()
   .AddCQRSRegistration()
   .AddFluentValidationConfiguration()
+  .AddServicesHealthChecks(configuration, environment)
   .AddApiServices();
 
 
 WebApplication app = builder.Build();
 
-app.UseApiServices();
+app
+  .MapServicesHealthChecks(environment)
+  .UseApiServices();
 
 await app.RunAsync();
 
