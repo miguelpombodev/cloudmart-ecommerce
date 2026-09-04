@@ -7,12 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Azure.Storage.Blobs" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="AspNetCore.HealthChecks.Prometheus.Metrics" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" />
     <PackageReference Include="Carter"/>
     <PackageReference Include="cloudmart.contracts" />
     <PackageReference Include="Mapster"/>
     <PackageReference Include="MassTransit" />
     <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="MediatR"/>
+    <PackageReference Include="prometheus-net.AspNetCore" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
     <PackageReference Include="Serilog.Sinks.Grafana.Loki"/>
     <PackageReference Include="ErrorOr"/>
     <PackageReference Include="Scalar.AspNetCore"/>
@@ -48,6 +56,7 @@
     <PackageReference Include="Serilog.Sinks.Console"/>
     <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
     <PackageReference Include="Azure.Storage.Blobs"/>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
   </ItemGroup>
 
   <ItemGroup>
