@@ -93,17 +93,16 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
-
     volumes:
       - ../observability/otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
-
     depends_on:
       - tempo
       - prometheus
       - loki
-
     networks:
       - cloudmart_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   prometheus_data:
