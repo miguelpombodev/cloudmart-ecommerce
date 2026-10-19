@@ -2,9 +2,7 @@ using System.Reflection;
 using BuildingBlocks.Behaviors;
 using FluentValidation;
 using Mapster;
-using MassTransit;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Identity.Application;

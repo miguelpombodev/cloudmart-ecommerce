@@ -1,6 +1,6 @@
+using BuildingBlocks.Authorization;
 using BuildingBlocks.Domain;
 using BuildingBlocks.Exceptions;
-using Identity.Domain.Enums;
 
 namespace Identity.Domain.Entities;
 

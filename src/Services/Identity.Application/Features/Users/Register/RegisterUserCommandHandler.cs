@@ -1,10 +1,10 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Authorization;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Events.Notifications.Factories.WelcomeEmail;
 using BuildingBlocks.Infrastructure;
 using Identity.Application.Abstractions.Repositories;
 using Identity.Domain.Entities;
-using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 using Mapster;
 using MassTransit;

@@ -1,3 +1,7 @@
+using BuildingBlocks.Abstractions;
+using BuildingBlocks.Context;
+using BuildingBlocks.Extensions.API;
+using BuildingBlocks.Middlewares;
 using Carter;
 using Scalar.AspNetCore;
 
@@ -5,33 +9,28 @@ namespace Cloudmart.Catalog;
 
 internal static class DependencyInjectionExtensions
 {
+
+
   public static IServiceCollection AddApiServices(this IServiceCollection services)
   {
-    services.AddRouting();
-    services.AddOpenApi();
-    services.AddCarter();
+    services.AddEndpointsServiceResources();
+
+    services.AddTransient<GlobalExceptionHandlerMiddleware>();
+    services.AddScoped<ICurrentUser, CurrentUser>();
 
     return services;
   }
 
   public static WebApplication UseApiServices(this WebApplication app)
   {
-    app.UseRouting();
-    app.MapCarter();
+    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<LogEnrichmentMiddleware>();
 
-    if (app.Environment.IsDevelopment())
-    {
-      app.MapOpenApi();
-      app.MapScalarApiReference(ConfigureScalar);
-    }
+    app.UseEndpointsServiceResources();
+
+    app.MapGroup("/api/v1/catalog").MapCarter();
 
     return app;
-  }
-
-  private static void ConfigureScalar(ScalarOptions x)
-  {
-    x.Title = "Catalog.API";
-    x.Theme = ScalarTheme.BluePlanet;
-    x.DarkMode = true;
   }
 }

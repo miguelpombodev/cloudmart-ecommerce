@@ -1,4 +1,4 @@
-namespace Cloudmart.Identity.Configurations;
+namespace BuildingBlocks.Authorization;
 
 public static class Policies
 {

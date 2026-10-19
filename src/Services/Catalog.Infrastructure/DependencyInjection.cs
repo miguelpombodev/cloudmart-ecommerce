@@ -1,81 +1,71 @@
+using BuildingBlocks.Authorization;
+using BuildingBlocks.Extensions.Infrastructure;
+using BuildingBlocks.Infrastructure.Providers.Storage;
+using BuildingBlocks.Options;
+using Catalog.Infrastructure.Providers.Storage;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using Serilog;
-using Serilog.Enrichers.OpenTelemetry;
+using Microsoft.Extensions.Hosting;
 
 namespace Catalog.Infrastructure;
 
 public static class DependencyInjection
 {
-  public static IServiceCollection AddInfrastructureServices(
-    this IServiceCollection services,
-    IConfiguration configuration)
-  {
-    string checkConnectionString =
-      configuration.GetConnectionString("Database") ??
-      throw new InvalidOperationException("No Connection String informed");
+  private const string StorageSectionName = "StorageProvider";
 
-    configuration.GetConnectionString(checkConnectionString);
+  public static IServiceCollection AddRepositories(this IServiceCollection services)
+  {
+
 
     return services;
   }
 
-  public static ILoggingBuilder AddLoggingBuilder(
-    this ILoggingBuilder logging,
-    IConfiguration configuration)
+  public static IServiceCollection AddAuthenticationWithPolicies(
+    this IServiceCollection services,
+    IWebHostEnvironment environment)
   {
-    string serviceName =
-      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
+    bool isProduction = environment.IsProduction();
 
-    Log.Logger = new LoggerConfiguration()
-      .Enrich
-      .WithProperty("service", serviceName)
-      .Enrich
-      .WithEnvironmentName()
-      .Enrich
-      .WithMachineName()
-      .Enrich
-      .WithThreadId()
-      .Enrich
-      .WithOpenTelemetryTraceId()
-      .Enrich
-      .WithOpenTelemetrySpanId()
-      .WriteTo
-      .Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] [{MachineName}] {Message:lj}{NewLine}{Exception}")
-      .CreateLogger();
-
-    logging.AddOpenTelemetry(options =>
+    services.AddAuthorization(options =>
     {
-      options.SetResourceBuilder(
-          ResourceBuilder.CreateDefault()
-            .AddService(serviceName))
-        .AddConsoleExporter();
+      options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+      options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole(nameof(RoleType.Admin)));
+      options.AddPolicy(Policies.CatalogManagement, policy => policy.RequireRole("Admin", "Manager", "Seller"));
+
+      options.AddPolicy(
+        Policies.VerifiedSeller,
+        policy => policy.RequireRole(nameof(RoleType.Seller)).RequireClaim("email_verified", "true"));
+
+      if (isProduction)
+      {
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+          .RequireAuthenticatedUser()
+          .Build();
+      }
     });
 
-    return logging;
+    return services;
   }
 
-  public static IServiceCollection AddTelemetryServices(
+  public static IServiceCollection AddProviders(
     this IServiceCollection services,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    IWebHostEnvironment environment)
   {
-    string serviceName =
-      configuration["ServiceName"] ?? throw new InvalidOperationException("No Service Name informed");
 
-    services.AddOpenTelemetry()
-      .ConfigureResource(resource => resource.AddService(serviceName))
-      .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddConsoleExporter())
-      .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddConsoleExporter());
+    services.AddScoped<IStorageProvider, StorageServiceProvider>();
+
+    return services;
+  }
+
+  public static IServiceCollection AddProviderOptions(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+    services.Configure<OpenTelemetryOptions>(configuration.GetSection(TelemetryServices.OtelSectionName));
+    services.Configure<StorageProvider>(configuration.GetSection(StorageSectionName));
 
     return services;
   }

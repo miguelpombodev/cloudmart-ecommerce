@@ -1,9 +1,8 @@
 using BuildingBlocks.Abstractions;
-using BuildingBlocks.Extensions;
+using BuildingBlocks.Context;
 using BuildingBlocks.Extensions.API;
 using BuildingBlocks.Middlewares;
 using Carter;
-using Cloudmart.Identity.Services;
 
 namespace Cloudmart.Identity;
 

@@ -1,3 +1,3 @@
-namespace Identity.Domain.Dtos.Storage;
+namespace BuildingBlocks.Infrastructure.Providers.Storage;
 
 public record StorageUploadResponseDto(string Uri, string Name, string ContentType);

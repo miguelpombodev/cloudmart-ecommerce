@@ -1,6 +1,6 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Authorization;
 using Identity.Domain.Entities;
-using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 
 namespace Identity.Tests.Domain.Builder;

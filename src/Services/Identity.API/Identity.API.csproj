@@ -43,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Configurations\"/>
+    <Folder Include="Services\" />
   </ItemGroup>
 </Project>

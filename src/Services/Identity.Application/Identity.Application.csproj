@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Abstractions\Options\" />
     <Folder Include="Contracts\Users\" />
   </ItemGroup>
 

@@ -1,7 +1,8 @@
 using System.Security.Claims;
 using BuildingBlocks.Abstractions;
+using Microsoft.AspNetCore.Http;
 
-namespace Cloudmart.Identity.Services;
+namespace BuildingBlocks.Context;
 
 /// <summary>
 ///   assasasasaa.
