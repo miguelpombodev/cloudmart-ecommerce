@@ -8,6 +8,7 @@ using Identity.Tests.Domain.Builder;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly;
 using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.InactivateUser;
@@ -20,20 +21,19 @@ public class InactivateUserCommandHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
-
   public InactivateUserCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _uowMock = new Mock<IUnitOfWork>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
 
     var logger = new Mock<ILogger<InactivateUserCommandHandler>>();
 
     _handler = new InactivateUserCommandHandler(
       _repositoryMock.Object,
       _uowMock.Object,
-      _pipeline.Object,
+      pipeline.Object,
       logger.Object);
   }
 
@@ -41,7 +41,7 @@ public class InactivateUserCommandHandlerTests
   public async Task Handle_WhenUserDoesNotExist_ShouldReturnConflict()
   {
     // Arrange
-    Guid userId = Guid.NewGuid();
+    var userId = Guid.NewGuid();
 
     var command = new InactivateUserCommand(userId);
 

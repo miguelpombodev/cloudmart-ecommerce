@@ -9,6 +9,7 @@ using Identity.Tests.Domain.Builder;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly;
 using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.Register;
@@ -17,15 +18,13 @@ public class RegisterUserCommandHandlerTests
 {
   private readonly RegisterUserCommandHandler _commandHandler;
 
+  private readonly Mock<IPublishEndpoint> _publishEndpointMock;
+
   private readonly Mock<IUserRepository> _repositoryMock;
 
   private readonly Mock<IRoleRepository> _roleRepositoryMock;
 
   private readonly Mock<IUnitOfWork> _uowMock;
-
-  private readonly Mock<IPublishEndpoint> _publishEndpointMock;
-
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
 
   public RegisterUserCommandHandlerTests()
   {
@@ -33,7 +32,8 @@ public class RegisterUserCommandHandlerTests
     _roleRepositoryMock = new Mock<IRoleRepository>();
     _uowMock = new Mock<IUnitOfWork>();
     _publishEndpointMock = new Mock<IPublishEndpoint>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
 
     var logger = new Mock<ILogger<RegisterUserCommandHandler>>();
 
@@ -41,7 +41,7 @@ public class RegisterUserCommandHandlerTests
       _repositoryMock.Object,
       _roleRepositoryMock.Object,
       _uowMock.Object,
-      _pipeline.Object,
+      pipeline.Object,
       _publishEndpointMock.Object,
       logger.Object);
   }
@@ -56,7 +56,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -84,7 +84,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -118,7 +118,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -147,7 +147,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -178,7 +178,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -217,7 +217,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -232,7 +232,7 @@ public class RegisterUserCommandHandlerTests
 
     // Assert
     _publishEndpointMock.Verify(
-      p => p.Publish<INotificationRequest>(
+      p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()),
       Times.Once);
@@ -248,7 +248,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -261,7 +261,7 @@ public class RegisterUserCommandHandlerTests
     INotificationRequest? publishedNotification = null;
 
     _publishEndpointMock
-      .Setup(p => p.Publish<INotificationRequest>(
+      .Setup(p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
       .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
@@ -284,7 +284,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -297,7 +297,7 @@ public class RegisterUserCommandHandlerTests
     INotificationRequest? publishedNotification = null;
 
     _publishEndpointMock
-      .Setup(p => p.Publish<INotificationRequest>(
+      .Setup(p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
       .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
@@ -320,7 +320,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -333,7 +333,7 @@ public class RegisterUserCommandHandlerTests
     INotificationRequest? publishedNotification = null;
 
     _publishEndpointMock
-      .Setup(p => p.Publish<INotificationRequest>(
+      .Setup(p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
       .Callback<INotificationRequest, CancellationToken>((notification, _) => publishedNotification = notification);
@@ -465,7 +465,7 @@ public class RegisterUserCommandHandlerTests
 
     // Assert
     _publishEndpointMock.Verify(
-      p => p.Publish<INotificationRequest>(
+      p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
@@ -513,7 +513,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -542,7 +542,7 @@ public class RegisterUserCommandHandlerTests
       Times.Once);
 
     _publishEndpointMock.Verify(
-      r => r.Publish<INotificationRequest>(
+      r => r.Publish(
         It.IsAny<INotificationRequest>(),
         ct),
       Times.Once);
@@ -623,7 +623,7 @@ public class RegisterUserCommandHandlerTests
       Times.Never);
 
     _publishEndpointMock.Verify(
-      r => r.Publish<INotificationRequest>(
+      r => r.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
@@ -639,7 +639,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -671,7 +671,7 @@ public class RegisterUserCommandHandlerTests
       Times.Once);
 
     _publishEndpointMock.Verify(
-      r => r.Publish<INotificationRequest>(
+      r => r.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()),
       Times.Never);
@@ -687,7 +687,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -700,7 +700,7 @@ public class RegisterUserCommandHandlerTests
       .ReturnsAsync(role);
 
     _publishEndpointMock
-      .Setup(p => p.Publish<INotificationRequest>(
+      .Setup(p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()))
       .ThrowsAsync(new InvalidOperationException("RabbitMQ unavailable"));
@@ -736,7 +736,7 @@ public class RegisterUserCommandHandlerTests
       "joao@example.com",
       "Senha@123");
 
-    Role role = Role.Create("Customer");
+    var role = Role.Create("Customer");
 
     _repositoryMock
       .Setup(r => r.FindByEmail(command.Email, CancellationToken.None))
@@ -764,7 +764,7 @@ public class RegisterUserCommandHandlerTests
 
     _publishEndpointMock
       .InSequence(sequence)
-      .Setup(p => p.Publish<INotificationRequest>(
+      .Setup(p => p.Publish(
         It.IsAny<INotificationRequest>(),
         It.IsAny<CancellationToken>()));
 
