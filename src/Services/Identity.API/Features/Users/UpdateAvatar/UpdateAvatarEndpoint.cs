@@ -12,7 +12,7 @@ public sealed class UpdateAvatarEndpoint : ICarterModule
   /// <inheritdoc />
   public void AddRoutes(IEndpointRouteBuilder app)
   {
-    app.MapPatch("/user/avatar", async (
+    app.MapPatch("/user/me/avatar", async (
         IFormFile file,
         ICurrentUser currentUser,
         ISender sender,

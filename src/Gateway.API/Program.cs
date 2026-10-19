@@ -16,7 +16,13 @@ builder.Services
 
 WebApplication app = builder.Build();
 
-app.UseEndpointsServiceResources();
+app.UseRouting();
+
+app.AddScalarConfiguration();
+
+app.UseAntiforgery();
+
+app.UseHttpsRedirection();
 
 app.MapReverseProxy();
 

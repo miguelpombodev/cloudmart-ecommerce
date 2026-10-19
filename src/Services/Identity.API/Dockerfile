@@ -53,6 +53,7 @@ RUN adduser -S -u ${APP_UID} -G ${APP_USER} -h /app ${APP_USER} || true
 WORKDIR /app
 
 ENV DOTNET_RUNNING_IN_CONTAINER=true \
+    DOTNET_EnableDiagnostics=1 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 COPY --from=publish --chown=${APP_USER}:${APP_USER} /app/publish .
