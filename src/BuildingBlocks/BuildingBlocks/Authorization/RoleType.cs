@@ -1,4 +1,4 @@
-namespace Identity.Domain.Enums;
+namespace BuildingBlocks.Authorization;
 
 public enum RoleType
 {

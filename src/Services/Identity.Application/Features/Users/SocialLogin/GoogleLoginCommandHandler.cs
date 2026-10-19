@@ -1,11 +1,11 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Authorization;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
 using Identity.Application.Abstractions.Auth;
 using Identity.Application.Abstractions.Repositories;
 using Identity.Application.Features.Users.Login;
 using Identity.Domain.Entities;
-using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 using Microsoft.Extensions.Logging;
 using Polly;

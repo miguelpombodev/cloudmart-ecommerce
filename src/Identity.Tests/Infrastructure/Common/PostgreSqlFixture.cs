@@ -1,5 +1,5 @@
+using BuildingBlocks.Authorization;
 using Identity.Domain.Entities;
-using Identity.Domain.Enums;
 using Identity.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

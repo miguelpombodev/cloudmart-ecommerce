@@ -1,19 +1,42 @@
+using BuildingBlocks.Extensions.API;
+using BuildingBlocks.Extensions.Infrastructure;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 ConfigurationManager configuration = builder.Configuration;
+IWebHostEnvironment environment = builder.Environment;
 
-builder.Logging.AddLoggingBuilder(configuration);
+builder.Host.AddSerilogConfigurations();
 
 builder.Services
-  .AddApplicationServices()
-  .AddInfrastructureServices(configuration)
-  .AddTelemetryServices(configuration)
+  .AddProviderOptions(configuration)
+  .AddTelemetryProviderConfiguration(configuration)
+  .AddDatabaseConfigurations<ApplicationDbContext>(configuration, environment)
+  .AddRepositories()
+  .AddMassTransitConfiguration(configuration)
+  .AddProviders(configuration, builder.Environment)
+  .AddJwtAuthenticationWithCookie(configuration)
+  .AddAuthenticationWithPolicies(builder.Environment)
+  .AddNonHttpResilience()
+  .AddStorageProviderResilience()
+  .AddAntiForgeryService()
+  .AddCQRSRegistration()
+  .AddFluentValidationConfiguration()
+  .AddServicesHealthChecks(configuration, environment)
   .AddApiServices();
-
-builder.Services.AddMediatR(x => { x.RegisterServicesFromAssemblies(typeof(Program).Assembly); });
 
 WebApplication app = builder.Build();
 
-app.UseApiServices();
+app
+  .MapServicesHealthChecks(environment)
+  .UseApiServices();
 
 await app.RunAsync();
+
+/// <summary>
+///   asasasaasas.
+/// </summary>
+// This is only for tests
+public abstract partial class Program
+{
+}

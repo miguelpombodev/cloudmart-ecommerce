@@ -1,9 +1,8 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Infrastructure;
-using Identity.Application.Abstractions.Providers;
+using BuildingBlocks.Infrastructure.Providers.Storage;
 using Identity.Application.Abstractions.Repositories;
-using Identity.Domain.Dtos.Storage;
 using Identity.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Polly;

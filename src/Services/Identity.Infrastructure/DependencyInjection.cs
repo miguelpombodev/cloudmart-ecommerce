@@ -1,12 +1,10 @@
+using BuildingBlocks.Authorization;
 using BuildingBlocks.Extensions.Infrastructure;
 using BuildingBlocks.Infrastructure;
+using BuildingBlocks.Infrastructure.Providers.Storage;
 using BuildingBlocks.Options;
-using Cloudmart.Identity.Configurations;
 using Identity.Application.Abstractions.Auth;
-using Identity.Application.Abstractions.Options;
-using Identity.Application.Abstractions.Providers;
 using Identity.Application.Abstractions.Repositories;
-using Identity.Domain.Enums;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Providers;

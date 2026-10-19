@@ -106,11 +106,16 @@ services:
   catalog-db:
     image: postgres:16-alpine
     container_name: cloudmart_catalog_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U catalog -d CatalogDB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${CATALOG_DB_PASSWORD}
     volumes:
       - catalog_db_data:/var/lib/postgresql/data
       - ../volumes/postgres/inits/catalog_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -121,7 +126,7 @@ services:
     image: postgres:16-alpine
     container_name: cloudmart_identity_db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U catalog -d CatalogDB" ]
+      test: [ "CMD-SHELL", "pg_isready -U identity -d IdentityDB" ]
       interval: 10s
       timeout: 5s
       retries: 5

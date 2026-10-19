@@ -1,6 +1,6 @@
 using System.Text.Json;
+using BuildingBlocks.Options;
 using Identity.Application.Abstractions.Auth;
-using Identity.Application.Abstractions.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

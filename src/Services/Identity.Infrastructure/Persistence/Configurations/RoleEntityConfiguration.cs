@@ -1,5 +1,5 @@
+using BuildingBlocks.Authorization;
 using Identity.Domain.Entities;
-using Identity.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

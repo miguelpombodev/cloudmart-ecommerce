@@ -1,7 +1,6 @@
-using Identity.Domain.Dtos.Storage;
 using Microsoft.AspNetCore.Http;
 
-namespace Identity.Application.Abstractions.Providers;
+namespace BuildingBlocks.Infrastructure.Providers.Storage;
 
 public interface IStorageProvider
 {
