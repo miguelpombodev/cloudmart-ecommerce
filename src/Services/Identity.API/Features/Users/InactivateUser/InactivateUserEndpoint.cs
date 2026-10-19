@@ -11,7 +11,7 @@ public sealed class InactivateUserEndpoint : ICarterModule
   /// <inheritdoc />
   public void AddRoutes(IEndpointRouteBuilder app)
   {
-    app.MapDelete("/user", async (
+    app.MapDelete("/user/me", async (
         ICurrentUser currentUser,
         ISender sender,
         CancellationToken cancellationToken) =>

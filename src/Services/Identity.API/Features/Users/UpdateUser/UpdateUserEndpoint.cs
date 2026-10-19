@@ -11,7 +11,7 @@ public sealed class UpdateUserEndpoint : ICarterModule
   /// <inheritdoc />
   public void AddRoutes(IEndpointRouteBuilder app)
   {
-    app.MapPut("/user",
+    app.MapPut("/user/me",
         async (
           ICurrentUser currentUser,
           UpdateUserRequest request,
