@@ -22,14 +22,12 @@ public class LoginUserHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
-
   public LoginUserHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _uowMock = new Mock<IUnitOfWork>();
     _tokenServiceMock = new Mock<ITokenService>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
 
     var logger = new Mock<ILogger<LoginCommandHandler>>();
 
@@ -37,7 +35,7 @@ public class LoginUserHandlerTests
       _repositoryMock.Object,
       _tokenServiceMock.Object,
       _uowMock.Object,
-      _pipeline.Object,
+      pipeline.Object,
       logger.Object);
   }
 
