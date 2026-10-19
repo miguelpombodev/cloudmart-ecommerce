@@ -28,6 +28,27 @@ public sealed class PostgreSqlFixture : WebApplicationFactory<Program>, IAsyncLi
   {
     await _container.StartAsync();
 
+    var settings = new Dictionary<string, string>
+    {
+      ["ConnectionStrings__Database"] = ConnectionString,
+      ["Authentication__Google__Url"] = "https://oauth2.googleapis.com/",
+      ["Authentication__Google__ClientId"] = "testing_client_id",
+      ["Authentication__Google__ClientSecret"] = "testing_client_secret",
+      ["Authentication__Google__TimeoutInMinutes"] = "1",
+      ["Jwt__SecretKey"] = "test-only-secret-key-with-at-least-32-chars!",
+      ["Jwt__Issuer"] = "thistest.com",
+      ["Jwt__Audience"] = "thistest.com",
+      ["Jwt__ExpirationMinutes"] = "15",
+      ["MessageBroker__Host"] = "amqp://unused:5672",
+      ["MessageBroker__Username"] = "unused",
+      ["MessageBroker__Password"] = "unused"
+    };
+
+    foreach ((string key, string value) in settings)
+    {
+      Environment.SetEnvironmentVariable(key, value);
+    }
+
     DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
       .UseNpgsql(ConnectionString)
       .Options;
@@ -35,7 +56,9 @@ public sealed class PostgreSqlFixture : WebApplicationFactory<Program>, IAsyncLi
     await using var context = new ApplicationDbContext(options);
     await context.Database.MigrateAsync();
 
-    DefaultCustomerRole = Role.CreateSeed(Guid.Parse("00000000-0000-0000-0000-000000000001"),"Test role", "Test role", RoleType.Customer);
+    DefaultCustomerRole = Role.CreateSeed(Guid.Parse("00000000-0000-0000-0000-000000000001"), "Test role", "Test role",
+      RoleType.Customer);
+
     context.Roles.Add(DefaultCustomerRole);
     await context.SaveChangesAsync();
   }

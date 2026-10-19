@@ -12,11 +12,11 @@ namespace Identity.Application.Features.Users.UpdateUser;
 
 public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result<Unit>>
 {
+  private readonly ResiliencePipeline _databasePipeline;
+
   private readonly ILogger<UpdateUserCommandHandler> _logger;
 
   private readonly IUserRepository _repository;
-
-  private readonly ResiliencePipeline _databasePipeline;
 
   private readonly IUnitOfWork _unitOfWork;
 
@@ -37,7 +37,8 @@ public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand
     User? user = await _databasePipeline.ExecuteAsync(async ct => await _repository.FindByIdAsync(
         request.UserId,
         ct
-      )
+      ),
+      cancellationToken
     );
 
     if (user is null)
@@ -57,7 +58,7 @@ public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand
     {
       _repository.UpdateAsync(newUser, ct);
       await _unitOfWork.SaveChangesAsync(ct);
-    });
+    }, cancellationToken);
 
     _logger.LogInformation("New information for User {UserId} were updated successfully", newUser.Id);
 

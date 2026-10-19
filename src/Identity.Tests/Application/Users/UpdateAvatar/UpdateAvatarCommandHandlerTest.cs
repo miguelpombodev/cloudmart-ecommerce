@@ -2,6 +2,7 @@ using BuildingBlocks.Abstractions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly;
 using Polly.Registry;
 using FormFile = Microsoft.AspNetCore.Http.FormFile;
 using HeaderDictionary = Microsoft.AspNetCore.Http.HeaderDictionary;
@@ -32,21 +33,22 @@ public class UpdateAvatarCommandHandlerTests
 
   private readonly Mock<IUnitOfWork> _uowMock;
 
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
-
   public UpdateAvatarCommandHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
     _storageProviderMock = new Mock<IStorageProvider>();
     _uowMock = new Mock<IUnitOfWork>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
+    pipeline.Setup(x => x.GetPipeline("storage-operations")).Returns(ResiliencePipeline.Empty);
 
     var logger = new Mock<ILogger<UpdateAvatarCommandHandler>>();
 
     _handler = new UpdateAvatarCommandHandler(
       _repositoryMock.Object,
       _storageProviderMock.Object,
-      _pipeline.Object,
+      pipeline.Object,
       logger.Object,
       _uowMock.Object);
   }

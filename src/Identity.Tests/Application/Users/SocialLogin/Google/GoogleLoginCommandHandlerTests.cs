@@ -10,12 +10,15 @@ using Identity.Domain.Enums;
 using Identity.Domain.ValueObject;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly;
 using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.SocialLogin.Google;
 
 public class GoogleLoginCommandHandlerTests
 {
+  private readonly Mock<IExternalIdentityProvider> _googleProviderMock;
+
   private readonly GoogleLoginCommandHandler _handler;
 
   private readonly Mock<IUserRepository> _repositoryMock;
@@ -24,11 +27,7 @@ public class GoogleLoginCommandHandlerTests
 
   private readonly Mock<ITokenService> _tokenServiceMock;
 
-  private readonly Mock<IExternalIdentityProvider> _googleProviderMock;
-
   private readonly Mock<IUnitOfWork> _uowMock;
-
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
 
   public GoogleLoginCommandHandlerTests()
   {
@@ -37,7 +36,9 @@ public class GoogleLoginCommandHandlerTests
     _tokenServiceMock = new Mock<ITokenService>();
     _googleProviderMock = new Mock<IExternalIdentityProvider>();
     _uowMock = new Mock<IUnitOfWork>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
 
     var logger = new Mock<ILogger<GoogleLoginCommandHandler>>();
 
@@ -46,7 +47,7 @@ public class GoogleLoginCommandHandlerTests
       _roleRepositoryMock.Object,
       _tokenServiceMock.Object,
       _googleProviderMock.Object,
-      _pipeline.Object,
+      pipeline.Object,
       logger.Object,
       _uowMock.Object);
   }
@@ -141,7 +142,7 @@ public class GoogleLoginCommandHandlerTests
       Provider: "Google",
       ProviderId: "google-123");
 
-    Role customerRole = Role.Create(nameof(RoleType.Customer));
+    var customerRole = Role.Create(nameof(RoleType.Customer));
 
     var tokenResult = new TokenResult(
       "jwt-token",
@@ -515,7 +516,7 @@ public class GoogleLoginCommandHandlerTests
 
   private static User CreateUser()
   {
-    Role role = Role.Create(nameof(RoleType.Customer));
+    var role = Role.Create(nameof(RoleType.Customer));
 
     return User.Create(
       CompleteName.Create("John", "Doe"),

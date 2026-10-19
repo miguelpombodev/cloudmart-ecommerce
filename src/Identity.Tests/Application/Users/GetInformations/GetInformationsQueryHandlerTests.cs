@@ -16,16 +16,15 @@ public class GetInformationsQueryHandlerTests
 
   private readonly Mock<IUserRepository> _repositoryMock;
 
-  private readonly Mock<ResiliencePipelineProvider<string>> _pipeline;
-
   public GetInformationsQueryHandlerTests()
   {
     _repositoryMock = new Mock<IUserRepository>();
-    _pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
 
     _handler = new GetInformationsQueryHandler(
       _repositoryMock.Object,
-      _pipeline.Object
+      pipeline.Object
     );
   }
 
@@ -33,7 +32,7 @@ public class GetInformationsQueryHandlerTests
   public async Task Handle_WhenUserDoesNotExist_ShouldReturnConflict()
   {
     // Arrange
-    Guid userId = Guid.NewGuid();
+    var userId = Guid.NewGuid();
 
     var query = new GetInformationsQuery(userId);
 

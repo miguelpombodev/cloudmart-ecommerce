@@ -8,6 +8,7 @@ using Identity.Domain.Entities;
 using Identity.Tests.Domain.Builder;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Polly;
 using Polly.Registry;
 
 namespace Identity.Tests.Application.Users.LoginUser;
@@ -28,6 +29,8 @@ public class LoginUserHandlerTests
     _uowMock = new Mock<IUnitOfWork>();
     _tokenServiceMock = new Mock<ITokenService>();
     var pipeline = new Mock<ResiliencePipelineProvider<string>>();
+
+    pipeline.Setup(x => x.GetPipeline("database-operations")).Returns(ResiliencePipeline.Empty);
 
     var logger = new Mock<ILogger<LoginCommandHandler>>();
 
