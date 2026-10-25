@@ -6,11 +6,7 @@
     <ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj"/>
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj"/>
 
-    <PackageReference Include="FluentValidation" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Products\CreateProduct\"/>
+    <PackageReference Include="FluentValidation"/>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
   </ItemGroup>
 </Project>
