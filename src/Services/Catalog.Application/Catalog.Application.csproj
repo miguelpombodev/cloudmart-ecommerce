@@ -8,5 +8,6 @@
 
     <PackageReference Include="FluentValidation"/>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+    <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

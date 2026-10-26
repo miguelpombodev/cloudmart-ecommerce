@@ -92,4 +92,7 @@ public sealed class Product : Aggregate<Guid>
 
     _images.Add(image);
   }
+
+  public bool IsAvalaible() =>
+    StockQuantity == 0;
 }

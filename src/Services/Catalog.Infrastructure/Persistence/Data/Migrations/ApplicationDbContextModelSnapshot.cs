@@ -71,6 +71,10 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -93,7 +97,8 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                         .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("UUID");
+                        .HasColumnType("UUID")
+                        .HasColumnName("product_brand_id");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("UUID")
@@ -123,7 +128,8 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                         .HasColumnName("product_sku");
 
                     b.Property<int>("StockQuantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("product_stock_quantity");
 
                     b.PrimitiveCollection<List<string>>("Tags")
                         .IsRequired()
@@ -345,7 +351,7 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                                 .HasColumnType("UUID");
 
                             b1.Property<decimal>("Value")
-                                .HasColumnType("NUMERIC(1,1)")
+                                .HasColumnType("NUMERIC(2,1)")
                                 .HasColumnName("review_rating");
 
                             b1.HasKey("ProductReviewId");

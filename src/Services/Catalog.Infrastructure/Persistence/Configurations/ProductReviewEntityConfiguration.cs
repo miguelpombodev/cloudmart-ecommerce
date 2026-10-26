@@ -18,7 +18,7 @@ public sealed class ProductReviewEntityConfiguration : IEntityTypeConfiguration<
       x => x.Rating,
       rate =>
       {
-        rate.Property(x => x.Value).HasColumnName("review_rating").HasColumnType("NUMERIC(1,1)").IsRequired();
+        rate.Property(x => x.Value).HasColumnName("review_rating").HasColumnType("NUMERIC(2,1)").IsRequired();
         rate.HasIndex(x => x.Value).IsDescending();
       });
 
