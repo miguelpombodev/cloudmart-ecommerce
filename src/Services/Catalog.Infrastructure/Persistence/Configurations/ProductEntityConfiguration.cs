@@ -32,11 +32,14 @@ public sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Produc
 
     builder.Property(x => x.Sku).HasColumnName("product_sku").HasColumnType("VARCHAR(12)").IsRequired();
     builder.Property(x => x.CategoryId).HasColumnName("product_category_id").IsRequired();
+    builder.Property(x => x.BrandId).HasColumnName("product_brand_id").IsRequired();
 
     builder.Property(x => x.Description).HasColumnName("product_description").HasColumnType("VARCHAR(1200)")
       .IsRequired();
 
     builder.Property(x => x.Tags).HasColumnName("product_tags").HasColumnType("text[]");
+
+    builder.Property(x => x.StockQuantity).HasColumnType("INTEGER").HasColumnName("product_stock_quantity").IsRequired();
 
     builder.OwnsMany(
       p => p.Images,
