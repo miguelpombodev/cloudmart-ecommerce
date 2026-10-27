@@ -43,7 +43,7 @@ public class GetProductsListEndpoint : ICarterModule
 
           PaginatedResult<GetProductsResponse> response = result.Value.Adapt<PaginatedResult<GetProductsResponse>>();
 
-          return Results.Created("/product/", response);
+          return Results.Ok(response);
         })
       .WithName("GetProductsList")
       .ProducesProblem(StatusCodes.Status400BadRequest)
