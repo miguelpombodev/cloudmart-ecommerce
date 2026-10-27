@@ -9,23 +9,88 @@ permissions:
   packages: read
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  changes:
+    name: Verify services changes in repo
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: read
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - 'src/BuildingBlocks/**'
+              - 'src/Directory.*.props'
+              - 'src/nuget.config'
+            Identity:
+              - *shared
+              - 'src/Services/Identity.*/**'
+            Catalog:
+              - *shared
+              - 'src/Services/Catalog.*/**'
+  build:
+    needs: changes
+    if: ${{ needs.changes.outputs.services != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.services) }}
+    name: Build & Test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test GitHub Packages authentication
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -i \
+            -u "${{ github.actor }}:${GITHUB_TOKEN}" \
+            https://nuget.pkg.github.com/miguelpombodev/download/cloudmart.contracts/index.json
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "9.x"
+          dotnet-version: '10.x'
 
       - name: Restore dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: dotnet restore src
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Build
         run: dotnet build src --no-restore --configuration Release
 
       - name: Run dotnet format
         run: dotnet format src --verbosity d
+
+      - name: Build and push Docker images
+        uses: docker/setup-buildx-action@v3
+      - name: Image name in lowercase
+        run: echo "IMAGE=$(echo '${{ matrix.service }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+      - uses: build-push-action@v6
+        with:
+          context: src
+          file: src/Services/${{ matrix.service }}.API/Dockerfile
+          push: false
+          platforms: linux/amd64,linux/arm64
+          tags: wallghost/email-sender-subscriber:latest
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,scope=${{ matrix.service }},mode=max
