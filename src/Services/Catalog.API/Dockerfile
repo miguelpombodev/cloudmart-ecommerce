@@ -1,23 +1,62 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
+
 WORKDIR /src
-COPY ["Services/Cloudmart.Catalog/Cloudmart.Catalog.csproj", "Services/Cloudmart.Catalog/"]
-RUN dotnet restore "Services/Cloudmart.Catalog/Cloudmart.Catalog.csproj"
+
+COPY ["nuget.config", "."]
+COPY ["Directory.Packages.props", "."]
+COPY ["Directory.Build.props", "."]
+
+COPY ["Services/Catalog.API/Catalog.API.csproj", "Services/Catalog.API/"]
+COPY ["Services/Catalog.Application/Catalog.Application.csproj", "Services/Catalog.Application/"]
+COPY ["Services/Catalog.Infrastructure/Catalog.Infrastructure.csproj", "Services/Catalog.Infrastructure/"]
+COPY ["Services/Catalog.Domain/Catalog.Domain.csproj", "Services/Catalog.Domain/"]
+COPY ["BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "BuildingBlocks/BuildingBlocks/"]
+
+RUN --mount=type=secret,id=github_token \
+    --mount=type=cache,id=nuget-${TARGETARCH},target=/root/.nuget/packages \
+    export GITHUB_TOKEN="$(cat /run/secrets/github_token)" && \
+    dotnet restore \
+      "Services/Catalog.API/Catalog.API.csproj" \
+      --configfile /src/nuget.config
+
 COPY . .
-WORKDIR "/src/Services/Cloudmart.Catalog"
-RUN dotnet build "./Cloudmart.Catalog.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+WORKDIR "/src/Services/Catalog.API"
+
+RUN --mount=type=cache,id=nuget-${TARGETARCH},target=/root/.nuget/packages \
+    dotnet build "./Catalog.API.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/build \
+    --no-restore
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Cloudmart.Catalog.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Catalog.API.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 FROM base AS final
+
+ARG APP_USER=app
+ARG APP_UID=1000
+
+RUN adduser -S -u ${APP_UID} -G ${APP_USER} -h /app ${APP_USER} || true
+
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Cloudmart.Catalog.dll"]
+
+ENV DOTNET_RUNNING_IN_CONTAINER=true \
+    DOTNET_EnableDiagnostics=1 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+COPY --from=publish --chown=${APP_USER}:${APP_USER} /app/publish .
+
+USER ${APP_USER}
+ENTRYPOINT ["dotnet", "Catalog.API.dll"]
