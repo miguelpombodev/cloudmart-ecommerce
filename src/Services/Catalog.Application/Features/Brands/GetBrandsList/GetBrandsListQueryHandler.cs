@@ -31,7 +31,7 @@ public sealed class GetBrandsListQueryHandler : IQueryHandler<GetBrandsListQuery
     return await _context
       .Set<Brand>()
       .AsNoTracking()
-      .Select(brand => new BrandDto { Name = brand.Title.Value })
+      .Select(brand => new BrandDto { Name = brand.Title.Value, Url = brand.ImageUrl})
       .ToListAsync();
   }
 }

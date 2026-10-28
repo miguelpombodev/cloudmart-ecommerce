@@ -21,6 +21,8 @@ public sealed class BrandEntityConfiguration : IEntityTypeConfiguration<Brand>
 		    b.HasIndex(name => name.Value).IsUnique();
 			});
 
+    builder.Property(x => x.ImageUrl).HasColumnName("brand_image_url").HasMaxLength(2048).IsRequired();
+
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired();
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired();
 		builder.Property(x => x.CreatedBy).HasColumnName("created_by").IsRequired();
