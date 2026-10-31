@@ -92,9 +92,9 @@ jobs:
         with:
           context: src
           file: src/Services/${{ matrix.service }}.API/Dockerfile
-          push: false
+          push: true
           platforms: linux/amd64,linux/arm64
-          tags: wallghost/email-sender-subscriber:latest
+          tags: wallghost/${{ env.IMAGE }}:latest
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
           cache-from: type=gha,scope=${{ matrix.service }}
