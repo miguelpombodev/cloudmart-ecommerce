@@ -25,10 +25,8 @@ jobs:
         with:
           filters: |
             Identity:
-              - *shared
               - 'src/Services/Identity.*/**'
             Catalog:
-              - *shared
               - 'src/Services/Catalog.*/**'
   build:
     needs: changes
