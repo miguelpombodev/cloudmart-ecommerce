@@ -94,12 +94,12 @@ public class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Result<IP
   {
     if (request.Brands is { Count: > 0 })
     {
-      query = query.Where(field => request.Brands.Contains(field.BrandTitle));
+      query = query.Where(field => request.Brands.Contains(field.BrandId));
     }
 
     if (request.Categories is { Count: > 0 })
     {
-      query = query.Where(field => request.Categories.Contains(field.CategoryTitle));
+      query = query.Where(field => request.Categories.Contains(field.CategoryId));
     }
 
     if (request.MinValue.HasValue)
@@ -138,6 +138,7 @@ public class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Result<IP
           IsActive = join.product.IsActive,
           BrandId = join.brand.Id,
           BrandTitle = join.brand.Title.Value,
+          CategoryId = category.Id,
           CategoryTitle = category.Title.Value
         })
       .Where(product => product.IsActive);
