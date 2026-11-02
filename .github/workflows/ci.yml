@@ -24,10 +24,6 @@ jobs:
         id: filter
         with:
           filters: |
-            shared: &shared
-              - 'src/BuildingBlocks/**'
-              - 'src/Directory.*.props'
-              - 'src/nuget.config'
             Identity:
               - *shared
               - 'src/Services/Identity.*/**'
