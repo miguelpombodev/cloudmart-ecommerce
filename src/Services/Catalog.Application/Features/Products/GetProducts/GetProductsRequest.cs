@@ -12,8 +12,8 @@ public enum SortBy
 }
 
 public record GetProductsRequest(
-  List<string>? Brands,
-  List<string>? Categories,
+  List<Guid>? Brands,
+  List<Guid>? Categories,
   decimal? MinValue,
   decimal? MaxValue,
   SortBy? SortBy = null,
@@ -25,10 +25,10 @@ public record GetProductsRequest(
 public sealed class GetProductsParameters
 {
   [FromQuery(Name = "brands")]
-  public string[]? Brands { get; set; }
+  public Guid[]? Brands { get; set; }
 
   [FromQuery(Name = "categories")]
-  public string[]? Categories { get; set; }
+  public Guid[]? Categories { get; set; }
 
   [FromQuery(Name = "minValue")]
   public decimal? MinValue { get; set; }

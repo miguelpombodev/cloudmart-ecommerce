@@ -20,5 +20,7 @@ public record GetProductsQueryFieldList
 
   public string BrandTitle { get; init; } = string.Empty;
 
+  public Guid CategoryId { get; init; }
+
   public string CategoryTitle { get; init; } = string.Empty;
 }
