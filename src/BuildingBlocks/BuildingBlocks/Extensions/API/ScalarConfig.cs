@@ -1,5 +1,6 @@
 using Carter;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
@@ -15,11 +16,19 @@ public static class ScalarConfig
   /// <returns><c>WebApplication</c> instance</returns>
   public static WebApplication AddScalarConfiguration(this WebApplication app)
   {
-    if (app.Environment.IsDevelopment())
+    bool isEnv = app.Environment.IsDevelopment();
+
+    if (!isEnv)
     {
-      app.MapOpenApi();
-      app.MapScalarApiReference(ConfigureScalar).AllowAnonymous();
+      return app;
     }
+
+    app.MapOpenApi();
+    app.MapScalarApiReference(option => {
+      option.Title = app.Environment.ApplicationName;
+      option.Theme = ScalarTheme.BluePlanet;
+      option.DarkMode = true;
+    }).AllowAnonymous();
 
     return app;
   }
@@ -59,12 +68,5 @@ public static class ScalarConfig
     app.UseHttpsRedirection();
 
     return app;
-  }
-
-  private static void ConfigureScalar(ScalarOptions x)
-  {
-    x.Title = "Identity.API";
-    x.Theme = ScalarTheme.BluePlanet;
-    x.DarkMode = true;
   }
 }
