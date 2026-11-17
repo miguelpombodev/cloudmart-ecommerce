@@ -50,6 +50,11 @@ public class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Result<IP
         p.Title,
         p.Price,
         p.Currency,
+        p.Image,
+        p.CategoryTitle,
+        p.CategoryId,
+        p.BrandTitle,
+        p.BrandId,
         p.Sku,
         p.Description,
         p.Tags
@@ -128,9 +133,10 @@ public class GetProductsQueryHandler : IQueryHandler<GetProductsQuery, Result<IP
         join => join.product.CategoryId,
         category => category.Id,
         (join, category) => new GetProductsQueryFieldList
-          {
+        {
           Title = join.product.Title.Value,
           Price = join.product.Price.Amount,
+          Image = join.product.Images.FirstOrDefault(image => image.IsPrimary),
           Currency = join.product.Price.Currency,
           Sku = join.product.Sku,
           Description = join.product.Description,

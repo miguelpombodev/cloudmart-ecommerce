@@ -11,6 +11,13 @@ builder.Host.AddSerilogConfigurations();
 builder.Services
   .AddTelemetryProviderConfiguration(configuration)
   .AddAntiForgeryService()
+  .AddCors(options =>
+  {
+    options.AddDefaultPolicy(b => b
+      .AllowAnyOrigin()
+      .AllowAnyMethod()
+      .AllowAnyHeader());
+  })
   .AddReverseProxy()
   .LoadFromConfig(configuration.GetSection("ReverseProxy"));
 
@@ -24,6 +31,7 @@ app.UseAntiforgery();
 
 app.UseHttpsRedirection();
 
+app.UseCors();
 app.MapReverseProxy();
 
 await app.RunAsync();
