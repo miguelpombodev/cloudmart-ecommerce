@@ -1,8 +1,12 @@
+using Catalog.Domain.ValueObject;
+
 namespace Catalog.Application.Features.Products.GetProducts;
 
 public record GetProductsQueryFieldList
 {
   public string Title { get; init; } = string.Empty;
+
+  public Image? Image { get; init; }
 
   public decimal Price { get; init; }
 

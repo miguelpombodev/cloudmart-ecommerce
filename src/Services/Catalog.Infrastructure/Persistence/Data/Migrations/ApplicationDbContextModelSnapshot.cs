@@ -77,10 +77,6 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -248,6 +244,37 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
 
             modelBuilder.Entity("Catalog.Domain.Entities.Category", b =>
                 {
+                    b.OwnsOne("Catalog.Domain.ValueObject.Image", "Image", b1 =>
+                        {
+                            b1.Property<Guid>("CategoryId")
+                                .HasColumnType("UUID");
+
+                            b1.Property<string>("AltText")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("category_image_alt_text");
+
+                            b1.Property<bool>("IsPrimary")
+                                .HasColumnType("boolean")
+                                .HasColumnName("category_image_is_primary");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(2048)
+                                .HasColumnType("character varying(2048)")
+                                .HasColumnName("category_image_url");
+
+                            b1.HasKey("CategoryId");
+
+                            b1.HasIndex("Url");
+
+                            b1.ToTable("categories", "catalog");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CategoryId");
+                        });
+
                     b.OwnsOne("Catalog.Domain.ValueObject.Name", "Title", b1 =>
                         {
                             b1.Property<Guid>("CategoryId")
@@ -268,6 +295,9 @@ namespace Catalog.Infrastructure.Persistence.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CategoryId");
                         });
+
+                    b.Navigation("Image")
+                        .IsRequired();
 
                     b.Navigation("Title")
                         .IsRequired();

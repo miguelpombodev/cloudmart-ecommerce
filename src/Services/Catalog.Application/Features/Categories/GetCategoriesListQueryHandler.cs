@@ -1,8 +1,6 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.CQRS;
-using Catalog.Domain.Entities;
 using Catalog.Infrastructure;
-using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Application.Features.Categories;
@@ -23,7 +21,7 @@ public sealed class
   {
     List<CategoryResponse> response = await _context.Categories.AsNoTracking()
       .Select(x =>
-        new CategoryResponse { Id = x.Id, Title = x.Title.Value })
+        new CategoryResponse { Id = x.Id, Title = x.Title.Value, ImageUrl = x.Image.Url})
       .ToListAsync(cancellationToken);
 
 

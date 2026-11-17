@@ -21,6 +21,16 @@ public sealed class CategoryEntityConfiguration : IEntityTypeConfiguration<Categ
         category.HasIndex(x => x.Value).IsUnique();
       });
 
+    builder.OwnsOne(
+      x => x.Image,
+      category =>
+      {
+        category.Property(x => x.Url).HasColumnName("category_image_url").HasMaxLength(2048).IsRequired();
+        category.Property(x => x.IsPrimary).HasColumnName("category_image_is_primary");
+        category.Property(x => x.AltText).HasColumnName("category_image_alt_text").HasMaxLength(500);
+        category.HasIndex(x => x.Url);
+      });
+
     builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired();
     builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired();
     builder.Property(x => x.CreatedBy).HasColumnName("created_by").IsRequired();
